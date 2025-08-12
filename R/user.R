@@ -1,6 +1,5 @@
 #' Check the number of time series downloads remaining.
 #'
-#' @inheritParams param_defs
 #' @return table with quota information
 #' @export
 user_quota <- function() {
@@ -12,7 +11,6 @@ user_quota <- function() {
 
 #' Read information on the time series access sets for which the authenticated user has access type read, read_before_release or write.
 #'
-#' @inheritParams param_defs
 #' @return table with a row for every access set
 #' @export
 user_access_sets <- function() {

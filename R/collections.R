@@ -13,7 +13,6 @@ read_collections <- function() {
 
 #' Create a time series collection.
 #'
-#' @inheritParams param_defs
 #' @family time series collection functions
 #' @param collection name of the collection to create
 #' @param description description of the collection

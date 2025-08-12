@@ -133,7 +133,6 @@ write_ts <- function(
 
 #' Change the unique identifiers (keys) of time series.
 #'
-#' @inheritParams param_defs
 #' @family time series functions
 #' @param ts_keys Existing time series keys
 #' @param ts_keys_new New time series keys
