@@ -5,8 +5,8 @@
 #' @param datasets \strong{character} vector of the datasets. Dataset is a group of time series.
 #' @param valid_on \strong{character} representation of a date in the form of 'YYYY-MM-DD'. valid_on selects the
 #' version of a time series that is valid at the specified date.
-#' @param start 
-#' @param end 
+#' @param start start of history
+#' @param end end of history
 #' @param ignore_missing \strong{boolean} whether missing or forbidden time series should be ignored when requesting time series data.
 #' @param access_type \strong{boolean} how to access time series data. Must be one of 'oauth' (the default), 'public' or 'preview'. With 'oauth' (authentication/authorization), you must prove your identity by logging
 #' in to your account and you will only have the data access that is granted to that account. With 'public', you only have access to public time series data and with 'preview', you only access to a subset of the time series
