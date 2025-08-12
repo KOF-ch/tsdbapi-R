@@ -1,0 +1,12 @@
+variables:
+  _R_CHECK_ASCII_CODE_: "F"
+  _R_CHECK_ASCII_DATA_: "F"
+  ERROR_LEVEL: "warning"
+
+include:
+  - project: KOF/pipeline-templates
+    ref: main
+    file: r-cmd-check.gitlab-ci.yml
+  - project: KOF/pipeline-templates
+    ref: main
+    file: publish-kran-UNSAFE.gitlab-ci.yml

@@ -1,0 +1,25 @@
+Package: tsdbapi
+Version: 0.1.0
+Title: Get Data from the KOF Time Series API
+Description: Get Data from the KOF Time Series API
+Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
+Depends:
+  R (>= 3.3),
+  jsonlite (>= 1.1),
+  purrr
+Imports:
+  xts,
+  zoo,
+  httr2
+Suggests:
+  tstools,
+  rmarkdown,
+  testthat,
+  devtools
+URL: https://github.com/KOF-ch/tsdbapi
+BugReports: https://github.com/KOF-ch/tsdbapi/issues
+Date: 2025-07-30
+License: GPL-2
+LazyData: true
+RoxygenNote: 7.2.3
+Encoding: UTF-8
