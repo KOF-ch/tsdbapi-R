@@ -1,5 +1,5 @@
 Package: tsdbapi
-Version: 0.1.4
+Version: 0.1.5
 Title: Get Data from the KOF Time Series API
 Description: A package with functions to read and write time series data from a time series api. 
 Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
@@ -19,5 +19,5 @@ BugReports: https://github.com/KOF-ch/tsdbapi/issues
 Date: 2025-07-30
 License: GPL-2
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
