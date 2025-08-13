@@ -13,6 +13,7 @@ read_datasets <- function() {
 
 #' Read all time series of a time series dataset
 #'
+#' @inheritParams param_defs
 #' @family time series dataset functions
 #' @return List of time series. Regular time series have the class ts and irregular time series the class xts.
 #' @export
@@ -97,13 +98,13 @@ read_dataset_ts_metadata <- function(
 #' Read the history of all time series of a time series dataset (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
-#' @family time series collection functions
+#' @family time series dataset functions
 #' @return  List of time series. The name of each time series includes the vintage date, i.e. the date at which the particular version of the series became valid.
 #' @export
 read_dataset_ts_history <- function(
     dataset,
-    start = as.Date("1900-01-01"),
-    end = Sys.Date(),
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
     ignore_missing = F,
     respect_release = F) {
   

@@ -115,8 +115,8 @@ read_collection_ts_metadata <- function(
 #' @export
 read_collection_ts_history <- function(
     collection,
-    history_start_date = as.Date("1900-01-01"),
-    end = Sys.Date(),
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
     owner = NULL,
     ignore_missing = F,
     respect_release = F,

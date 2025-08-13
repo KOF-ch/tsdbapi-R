@@ -1,7 +1,7 @@
 Package: tsdbapi
-Version: 0.1.2
+Version: 0.1.3
 Title: Get Data from the KOF Time Series API
-Description: Get Data from the KOF Time Series API
+Description: A package with functions to read and write time series data from a time series api. 
 Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
 Depends:
   R (>= 3.3),

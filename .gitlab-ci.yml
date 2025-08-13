@@ -1,7 +1,7 @@
 variables:
   _R_CHECK_ASCII_CODE_: "F"
   _R_CHECK_ASCII_DATA_: "F"
-  ERROR_LEVEL: "error"
+  ERROR_LEVEL: "warning"
 
 include:
   - project: KOF/pipeline-templates

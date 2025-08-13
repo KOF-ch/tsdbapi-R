@@ -42,8 +42,8 @@ read_ts <- function(
 #' @export
 read_ts_history <- function(
     ts_keys,
-    start_date = as.Date("1900-01-01"),
-    end_date = Sys.Date(),
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
     ignore_missing = F,
     respect_release = F,
     access_type = "oauth") {
@@ -134,9 +134,9 @@ write_ts <- function(
 #' Change the unique identifiers (keys) of time series.
 #'
 #' @family time series functions
+#' @inheritParams param_defs
 #' @param ts_keys Existing time series keys
 #' @param ts_keys_new New time series keys
-#' @param ignore_missing 
 #' @export
 rename_ts <- function(
     ts_keys,
