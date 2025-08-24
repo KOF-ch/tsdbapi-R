@@ -4,7 +4,7 @@
 #' @family time series access set functions
 #' @return table with a row for every existing access set
 #' @export
-read_access_sets <- function() {
+list_access_sets <- function() {
   
   url <- paste0(base_url(), "access-sets")
   res <- req_base(url) %>% httr2::req_perform()

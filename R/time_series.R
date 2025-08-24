@@ -3,7 +3,7 @@ base_url_ts <- function() {
   paste0(base_url(), "ts/")
 }
 
-#' Read time series from the time series database. By default, this function returns the most recent version of a time series.
+#' Read time series from the time series database. By default, the function returns the most recent vintage of a time series.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
@@ -34,7 +34,7 @@ read_ts <- function(
   lapply(data, json_to_ts)
 }
 
-#' Read the history of time series (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
+#' Read the history of time series (multiple vintages). The time span is given by the valid_from and valid_to parameter. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
@@ -158,11 +158,34 @@ rename_ts <- function(
   cat(httr2::resp_body_json(res)$message)
 }
 
-#' Read the ID of the release of time series versions.
+#' Read the time at which time series vintages were written
 #'
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with release id for every time series key
+#' @return table with update time for every time series key
+#' @export
+read_ts_update_time <- function(
+    ts_keys,
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(base_url_ts(), "update-time")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      keys=paste0(ts_keys, collapse = ","),
+      valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release ID and the corresponding release date of time series vintages
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release id and release date for every time series key
 #' @export
 read_ts_release <- function(
     ts_keys,
@@ -181,7 +204,7 @@ read_ts_release <- function(
   fromJSON(httr2::resp_body_string(res))
 }
 
-#' Assign time series versions to a release (given by its ID).
+#' Assign time series vintages to a release (given by the release ID).
 #'
 #' @inheritParams param_defs
 #' @family time series functions 
@@ -240,7 +263,7 @@ write_ts_metadata <- function(
   cat(httr2::resp_body_json(res)$message)
 }
 
-#' Assign time series to a dataset. Every time series can be a part of only one dataset. 
+#' Assign time series to a dataset. Every time series can assigned to only one dataset. 
 #'
 #' @inheritParams param_defs
 #' @family time series functions

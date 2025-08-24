@@ -4,7 +4,7 @@
 #' @family time series dataset functions
 #' @return table with a row for every existing dataset
 #' @export
-read_datasets <- function() {
+list_datasets <- function() {
   
   url <- paste0(base_url(), "datasets")
   res <- req_base(url) %>% httr2::req_perform()

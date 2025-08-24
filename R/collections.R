@@ -4,7 +4,7 @@
 #' @family time series collection functions
 #' @return table with a row for every existing collection
 #' @export
-read_collections <- function() {
+list_collections <- function() {
   
   url <- paste0(base_url(), "collections")
   res <- req_base(url) %>% httr2::req_perform()
