@@ -12,9 +12,7 @@ base_url_ts <- function() {
 read_ts <- function(
     ts_keys,
     valid_on = Sys.Date(),
-    ignore_missing = F,
-    respect_release = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
 
   url <- base_url_ts()
   
@@ -24,9 +22,7 @@ read_ts <- function(
       mime="json",
       keys=paste0(ts_keys, collapse = ","),
       valid_on=as.character(valid_on),
-      respect_release=to_bool_query_param(respect_release),
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
@@ -44,9 +40,7 @@ read_ts_history <- function(
     ts_keys,
     valid_from = as.Date("1900-01-01"),
     valid_to = Sys.Date(),
-    ignore_missing = F,
-    respect_release = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
   
   url <- paste0(base_url_ts(), "history")
   
@@ -55,8 +49,8 @@ read_ts_history <- function(
       df="Y-m-d",
       mime="json",
       keys=paste0(ts_keys, collapse = ","),
-      start=as.character(start),
-      end=as.character(end),
+      valid_from=as.character(start),
+      valid_to=as.character(end),
       respect_release=to_bool_query_param(respect_release),
       ignore_missing=to_bool_query_param(ignore_missing),
       access_type=access_type) %>%
@@ -76,8 +70,7 @@ read_ts_history <- function(
 read_ts_metadata <- function(
     ts_keys,
     locale = c("en","de","fr","it","unlocalized"),
-    ignore_missing = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
   
   locale <- match.arg(locale)
   
@@ -91,7 +84,7 @@ read_ts_metadata <- function(
       access_type=access_type) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Write time series into the time series database. 
@@ -105,15 +98,19 @@ write_ts <- function(
   access_sets = character(),
   access = NULL,
   pre_release_access = NULL,
-  release_id = NULL,
-  release_date = NULL) {
+  release_name = NULL,
+  release_year = NULL,
+  release_period = NULL,
+  release_time = NULL) {
   
   url <- base_url_ts()
 
   data <- list(
     valid_from=unbox(valid_from),
-    release_date=unbox(release_date),
-    release_id=unbox(release_id),
+    release_time=unbox(release_time),
+    release_name=unbox(release_name),
+    release_year=unbox(release_year),
+    release_period=unbox(release_period),
     access_sets=access_sets,
     access=unbox(access),
     pre_release_access=unbox(pre_release_access))
@@ -178,7 +175,7 @@ read_ts_update_time <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Read the release ID and the corresponding release date of time series vintages
@@ -201,7 +198,7 @@ read_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Assign time series vintages to a release (given by the release ID).
@@ -211,14 +208,18 @@ read_ts_release <- function(
 #' @export
 write_ts_release <- function(
   ts_keys,
-  release_id,
+  release_name,
+  release_year,
+  release_period,
   valid_on = Sys.Date()) {
   
   url <- paste0(base_url_ts(), "release")
   
   data <- list(
     keys=ts_keys,
-    release_id=unbox(release_id),
+    release_name=unbox(release_id),
+    release_year=unbox(release_year),
+    release_period=unbox(release_period),
     valid_on=unbox(as.character(valid_on)))
   
   res <- req_base(url) %>%

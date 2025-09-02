@@ -8,7 +8,7 @@ list_datasets <- function() {
   
   url <- paste0(base_url(), "datasets")
   res <- req_base(url) %>% httr2::req_perform()
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Read all time series of a time series dataset
@@ -20,8 +20,7 @@ list_datasets <- function() {
 read_dataset_ts <- function(
     dataset,
     valid_on = Sys.Date(),
-    ignore_missing = F,
-    respect_release = F) {
+    ignore_missing = F) {
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts")
   
@@ -92,7 +91,7 @@ read_dataset_ts_metadata <- function(
     httr2::req_url_query(locale = locale, ignore_missing = to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Read the history of all time series of a time series dataset (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
@@ -105,8 +104,7 @@ read_dataset_ts_history <- function(
     dataset,
     valid_from = as.Date("1900-01-01"),
     valid_to = Sys.Date(),
-    ignore_missing = F,
-    respect_release = F) {
+    ignore_missing = F) {
   
   url <- paste0(base_url(), "datasets/", dataset ,"/ts/history")
   
@@ -138,5 +136,5 @@ read_dataset_keys <- function(dataset) {
     httr2::req_url_query(mime="csv") %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }

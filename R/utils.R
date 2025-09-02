@@ -3,31 +3,110 @@
   options(
     tsdbapi.oauth_client_id = Sys.getenv("TSDBAPI_OAUTH_CLIENT_ID", unset = "tsdb-api"),
     tsdbapi.oauth_client_token_url = Sys.getenv("TSDBAPI_OAUTH_CLIENT_TOKEN_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/token"),
-    tsdbapi.oauth_client_key = Sys.getenv("TSDBAPI_OAUTH_CLIENT_KEY", unset = "test"),
-    tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "HyrQnGXNGrppID3bHB2zj2VIIMYCYbnQ"),
+    tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "Mu2tJS4Diyy7yTceQQlxmxEwkrFXibww"),
     tsdbapi.oauth_auth_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth"),
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://localhost:1011"),
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
     tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2"),
     tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2"),
-    tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "https://localhost:3001"),
-    tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production")
+    tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/"),
+    tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production"),
+    tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "oauth"),
+    tsdbapi.read_before_release = Sys.getenv("TSDBAPI_READ_BEFORE_RELEASE", unset = T)
   )
+}
+
+
+#' Set package configuration options.
+#'
+#' @param oauth_client_id oauth client id
+#' @param oauth_client_token_url oauth client token url (see)
+#' @param oauth_client_key 
+#' @param oauth_client_secret 
+#' @param oauth_auth_url 
+#' @param oauth_redirect_url 
+#' @param oauth_offline_token 
+#' @param url_staging URL of staging API
+#' @param url_production URL of production API
+#' @param url_test URL of test API
+#' @param environment whether to use the production, staging or test API. Must be one of 'production', 'staging' or 'test.
+#' @param access_type how to access time series data. Must be one of 'oauth' (the default), 'public' or 'preview'.
+#' With 'oauth' (open authorization), you must prove your identity by logging
+#' in to your account and you will only have the access that is granted to that account.
+#' With 'public', you only have access to public time series data. With 'preview', you only have access to a subset of the time series
+#' for which previews are allowed. The time series previews will lack the latest 2 years of data.
+#' @param read_before_release whether time series vintages should be read before their official release. Defaults to TRUE. This option will only have
+#' an effect if you actually have pre release access to the requested time series.
+#' @export
+set_config <- function(
+  oauth_client_id = NULL,
+  oauth_client_token_url = NULL,
+  oauth_client_key = NULL,
+  oauth_client_secret = NULL,
+  oauth_auth_url = NULL,
+  oauth_redirect_url = NULL,
+  oauth_offline_token = NULL,
+  url_staging = NULL,
+  url_production = NULL,
+  url_test = NULL,
+  environment = NULL,
+  access_type = NULL,
+  read_before_release = NULL
+) {
+  if(!is.null(oauth_client_id)) {
+    options(tsdbapi.oauth_client_id = oauth_client_id)
+  }
+  if(!is.null(oauth_client_token_url)) {
+    options(tsdbapi.oauth_client_token_url = oauth_client_token_url)
+  }
+  if(!is.null(oauth_client_key)) {
+    options(tsdbapi.oauth_client_key = oauth_client_key)
+  }
+  if(!is.null(oauth_client_secret)) {
+    options(tsdbapi.oauth_client_secret = oauth_client_secret)
+  }
+  if(!is.null(oauth_auth_url)) {
+    options(tsdbapi.oauth_auth_url = oauth_auth_url)
+  }
+  if(!is.null(oauth_redirect_url)) {
+    options(tsdbapi.oauth_redirect_url = oauth_redirect_url)
+  }
+  if(!is.null(oauth_offline_token)) {
+    options(tsdbapi.oauth_offline_token = oauth_offline_token)
+  }
+  if(!is.null(url_staging)) {
+    options(tsdbapi.url_staging = url_staging)
+  }
+  if(!is.null(url_production)) {
+    options(tsdbapi.url_production = url_production)
+  }
+  if(!is.null(url_test)) {
+    options(tsdbapi.url_test = url_test)
+  }
+  if(!is.null(environment)) {
+    options(tsdbapi.environment = environment)
+  }
+  if(!is.null(access_type)) {
+    options(tsdbapi.access_type = access_type)
+  }
+  if(!is.null(read_before_release)) {
+    options(tsdbapi.read_before_release = read_before_release)
+  }
 }
 
 get_oauth_client <- function() {
   httr2::oauth_client(
     id = getOption("tsdbapi.oauth_client_id"),
-    token_url = getOption("tsdbapi.oauth_client_token_url"),,
-    key = getOption("tsdbapi.oauth_client_key"),
+    token_url = getOption("tsdbapi.oauth_client_token_url"),
     auth = "body",
-    secret = getOption("tsdbapi.oauth_client_secret"))
+    # secret = httr2::obfuscated(getOption("tsdbapi.oauth_client_secret")),
+    secret = getOption("tsdbapi.oauth_client_secret")
+  )
 } 
-
 
 #' Requests a refresh token that does not expire at the end of a session.
 #'
-#' @param set_option set the tsdbapi.oauth_offline_token option. That way, the package will use the offline token to get temporary access tokens.
+#' @param set_option set the tsdbapi.oauth_offline_token option. That way, the package will use the offline token to get access tokens.
 #' @returns offline token
 #' @export
 get_offline_token <- function(set_option = T) {
@@ -53,12 +132,13 @@ req_base <- function(url) {
   if(offline_token == "") {
     req <- req %>% httr2::req_oauth_auth_code(
       client = get_oauth_client(),
+      redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
       auth_url = getOption("tsdbapi.oauth_auth_url"))
   } else {
     req <- req %>% httr2::req_oauth_refresh(client, refresh_token = offline_token)
   }
 
-  req 
+  req %>% httr2::req_url_query(access_type = getOption("tsdbapi.access_type"), read_before_release = getOption("tsdbapi.read_before_release"))
 }
 
 to_bool_query_param <- function(arg) {

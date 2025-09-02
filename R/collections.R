@@ -8,7 +8,7 @@ list_collections <- function() {
   
   url <- paste0(base_url(), "collections")
   res <- req_base(url) %>% httr2::req_perform()
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Create a time series collection.
@@ -59,9 +59,7 @@ read_collection_ts <- function(
     collection,
     valid_on = Sys.Date(),
     owner = NULL,
-    ignore_missing = F,
-    respect_release = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
   
   url <- paste0(base_url(), "collections/", collection, "/ts")
   
@@ -89,8 +87,7 @@ read_collection_ts_metadata <- function(
     collection,
     locale=c("de","en","fr","it","unlocalized"),
     owner = NULL,
-    ignore_missing = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
   
   locale <- match.arg(locale)
   
@@ -104,7 +101,7 @@ read_collection_ts_metadata <- function(
       access_type=access_type) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Read the history of all time series of a time series collection (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
@@ -118,9 +115,7 @@ read_collection_ts_history <- function(
     valid_from = as.Date("1900-01-01"),
     valid_to = Sys.Date(),
     owner = NULL,
-    ignore_missing = F,
-    respect_release = F,
-    access_type = "oauth") {
+    ignore_missing = F) {
   
   url <- paste0(base_url(), "collections/", collection ,"/ts/history")
   
@@ -155,7 +150,7 @@ read_collection_keys <- function(
     httr2::req_url_query(mime="csv", owner=owner) %>%
     httr2::req_perform()
   
-  fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
 #' Adds existing time series (given by their keys) to a time series collection.
