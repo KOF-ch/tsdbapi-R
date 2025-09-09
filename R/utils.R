@@ -138,7 +138,10 @@ req_base <- function(url) {
     req <- req %>% httr2::req_oauth_refresh(client, refresh_token = offline_token)
   }
 
-  req %>% httr2::req_url_query(access_type = getOption("tsdbapi.access_type"), read_before_release = getOption("tsdbapi.read_before_release"))
+  req %>% httr2::req_url_query(
+    access_type = getOption("tsdbapi.access_type"),
+    read_before_release = to_bool_query_param(getOption("tsdbapi.read_before_release"))
+  )
 }
 
 to_bool_query_param <- function(arg) {

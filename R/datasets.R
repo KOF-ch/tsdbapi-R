@@ -30,7 +30,7 @@ read_dataset_ts <- function(
       mime = "json",
       valid_on = as.character(valid_on),
       ignore_missing = to_bool_query_param(ignore_missing)) %>%
-    httr2::req_perform(verbosity = 3)
+    httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
   names(data) <- map_chr(data, "ts_key")
@@ -45,7 +45,7 @@ read_dataset_ts <- function(
 create_dataset <- function(
     dataset,
     description) {
-  url <- paste0(base_url(), "datasets/", dataset_name)
+  url <- paste0(base_url(), "datasets/", dataset)
   
   data <- list(description=description)
   
@@ -63,7 +63,7 @@ create_dataset <- function(
 #' @family time series dataset functions
 #' @export
 delete_dataset <- function(dataset) {
-  url <- paste0(base_url(), "datasets/", dataset_name)
+  url <- paste0(base_url(), "datasets/", dataset)
   
   res <- req_base(url) %>%
     httr2::req_method("DELETE") %>% 

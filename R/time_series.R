@@ -98,7 +98,7 @@ write_ts <- function(
   access_sets = character(),
   access = NULL,
   pre_release_access = NULL,
-  release_name = NULL,
+  release_topic = NULL,
   release_year = NULL,
   release_period = NULL,
   release_time = NULL) {
@@ -108,7 +108,7 @@ write_ts <- function(
   data <- list(
     valid_from=unbox(valid_from),
     release_time=unbox(release_time),
-    release_name=unbox(release_name),
+    release_topic=unbox(release_topic),
     release_year=unbox(release_year),
     release_period=unbox(release_period),
     access_sets=access_sets,
@@ -269,7 +269,7 @@ write_ts_metadata <- function(
 #' @inheritParams param_defs
 #' @family time series functions
 #' @export
-assign_ts_to_dataset <- function(
+write_ts_dataset <- function(
     ts_keys,
     dataset) {
   
@@ -285,5 +285,25 @@ assign_ts_to_dataset <- function(
   cat(httr2::resp_body_json(res)$message)
 }
 
+#' Read the release ID and the corresponding release date of time series vintages
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release id and release date for every time series key
+#' @export
+read_ts_dataset <- function(
+    ts_keys,
+    ignore_missing = F) {
+  
+  url <- paste0(base_url_ts(), "dataset")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      keys=paste0(ts_keys, collapse = ","),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
 
   

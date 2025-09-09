@@ -67,9 +67,9 @@ read_collection_ts <- function(
     httr2::req_url_query(
       df="Y-m-d",
       mime="json",
+      owner=owner,
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
