@@ -1,5 +1,5 @@
 
-base_url_ts <- function() {
+ts_base_url <- function() {
   paste0(base_url(), "ts/")
 }
 
@@ -14,7 +14,7 @@ read_ts <- function(
     valid_on = Sys.Date(),
     ignore_missing = F) {
 
-  url <- base_url_ts()
+  url <- ts_base_url()
   
   res <- req_base(url) %>%
     httr2::req_url_query(
@@ -42,18 +42,16 @@ read_ts_history <- function(
     valid_to = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(base_url_ts(), "history")
+  url <- paste0(ts_base_url(), "history")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       df="Y-m-d",
       mime="json",
       keys=paste0(ts_keys, collapse = ","),
-      valid_from=as.character(start),
-      valid_to=as.character(end),
-      respect_release=to_bool_query_param(respect_release),
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      valid_from=as.character(valid_from),
+      valid_to=as.character(valid_to),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
 
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
@@ -74,14 +72,13 @@ read_ts_metadata <- function(
   
   locale <- match.arg(locale)
   
-  url <- paste0(base_url_ts(), "metadata")
+  url <- paste0(ts_base_url(), "metadata")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       locale=locale, 
       keys=paste0(ts_keys, collapse = ","),
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -96,14 +93,14 @@ write_ts <- function(
   ts_list,
   valid_from = Sys.Date(),
   access_sets = character(),
-  access = NULL,
-  pre_release_access = NULL,
   release_topic = NULL,
   release_year = NULL,
   release_period = NULL,
+  access = NULL,
+  pre_release_access = NULL,
   release_time = NULL) {
   
-  url <- base_url_ts()
+  url <- ts_base_url()
 
   data <- list(
     valid_from=unbox(valid_from),
@@ -125,7 +122,7 @@ write_ts <- function(
     httr2::req_body_json(data, auto_unbox = F, null = "null", na = "null") %>% 
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat(httr2::resp_body_json(res)$message, "\n")
 }
 
 #' Change the unique identifiers (keys) of time series.
@@ -140,7 +137,7 @@ rename_ts <- function(
     ts_keys_new,
     ignore_missing = F) {
   
-  url <- paste0(base_url_ts(), "key")
+  url <- paste0(ts_base_url(), "key")
   
   data <- list(
     keys=ts_keys,
@@ -166,7 +163,7 @@ read_ts_update_time <- function(
     valid_on = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(base_url_ts(), "update-time")
+  url <- paste0(ts_base_url(), "update-time")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
@@ -178,23 +175,69 @@ read_ts_update_time <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Read the release ID and the corresponding release date of time series vintages
+#' Read the release history of time series
 #'
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with release id and release date for every time series key
+#' @return table with release topic, year, period and time for every time series key and release
 #' @export
 read_ts_release <- function(
     ts_keys,
     valid_on = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(base_url_ts(), "release")
+  url <- paste0(ts_base_url(), "release")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
       valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release history of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and release
+#' @export
+read_ts_release_history <- function(
+    ts_keys,
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(ts_base_url(), "release/history")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      keys=paste0(ts_keys, collapse = ","),
+      valid_from=as.character(valid_from),
+      valid_to=as.character(valid_to),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the future releases of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and future release
+#' @export
+read_ts_release_future <- function(
+    ts_keys,
+    ignore_missing = F) {
+  
+  url <- paste0(ts_base_url(), "release/future")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      keys=paste0(ts_keys, collapse = ","),
       ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
@@ -208,16 +251,16 @@ read_ts_release <- function(
 #' @export
 write_ts_release <- function(
   ts_keys,
-  release_name,
+  release_topic,
   release_year,
   release_period,
   valid_on = Sys.Date()) {
   
-  url <- paste0(base_url_ts(), "release")
+  url <- paste0(ts_base_url(), "release")
   
   data <- list(
     keys=ts_keys,
-    release_name=unbox(release_id),
+    release_topic=unbox(release_topic),
     release_year=unbox(release_year),
     release_period=unbox(release_period),
     valid_on=unbox(as.character(valid_on)))
@@ -245,7 +288,7 @@ write_ts_metadata <- function(
     
   locale <- match.arg(locale)
   
-  url <- paste0(base_url_ts(), "metadata")
+  url <- paste0(ts_base_url(), "metadata")
   
   data <- list(
     overwrite = to_bool_query_param(overwrite),
@@ -261,7 +304,7 @@ write_ts_metadata <- function(
     httr2::req_body_json(data) %>% 
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat(httr2::resp_body_json(res)$message, "\n")
 }
 
 #' Assign time series to a dataset. Every time series can assigned to only one dataset. 
@@ -273,7 +316,7 @@ write_ts_dataset <- function(
     ts_keys,
     dataset) {
   
-  url <- paste0(base_url_ts(), "dataset")
+  url <- paste0(ts_base_url(), "dataset")
   
   data <- list(keys=ts_keys, dataset=unbox(dataset))
   
@@ -295,7 +338,7 @@ read_ts_dataset <- function(
     ts_keys,
     ignore_missing = F) {
   
-  url <- paste0(base_url_ts(), "dataset")
+  url <- paste0(ts_base_url(), "dataset")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
@@ -307,3 +350,45 @@ read_ts_dataset <- function(
 }
 
   
+#' Change the unique identifiers (keys) of time series.
+#'
+#' @family time series functions
+#' @inheritParams param_defs
+#' @param ts_keys Existing time series keys
+#' @export
+delete_ts <- function(
+    ts_keys,
+    ignore_missing = F) {
+  
+  url <- ts_base_url()
+  
+  data <- list(
+    keys=ts_keys,
+    ignore_missing=unbox(to_bool_query_param(ignore_missing)))
+  
+  res <- req_base(url) %>%
+    httr2::req_method("DELETE") %>% 
+    httr2::req_body_json(data, auto_unbox = F) %>% 
+    httr2::req_perform()
+  
+  cat(httr2::resp_body_json(res)$message)
+}
+
+
+#' Read the time at which time series vintages were written
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with update time for every time series key
+#' @export
+find_ts <- function(
+    regexp) {
+  
+  url <- paste0(ts_base_url(), "key")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(regexp=regexp) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}

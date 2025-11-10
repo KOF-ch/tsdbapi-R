@@ -3,7 +3,7 @@
   options(
     tsdbapi.oauth_client_id = Sys.getenv("TSDBAPI_OAUTH_CLIENT_ID", unset = "tsdb-api"),
     tsdbapi.oauth_client_token_url = Sys.getenv("TSDBAPI_OAUTH_CLIENT_TOKEN_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/token"),
-    tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "Mu2tJS4Diyy7yTceQQlxmxEwkrFXibww"),
+    tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "6rZ4TmOPbKKa1oWqbPOH4RxFbMCHCEr0g9ybz91jJ5Mt7GIktdrWx5F4KykoukxV"),
     tsdbapi.oauth_auth_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth"),
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://localhost:1011"),
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
@@ -20,12 +20,11 @@
 #' Set package configuration options.
 #'
 #' @param oauth_client_id oauth client id
-#' @param oauth_client_token_url oauth client token url (see)
-#' @param oauth_client_key 
-#' @param oauth_client_secret 
-#' @param oauth_auth_url 
-#' @param oauth_redirect_url 
-#' @param oauth_offline_token 
+#' @param oauth_client_token_url oauth client token url
+#' @param oauth_client_secret obfuscated oauth client secret. Obfuscate secret with httr2::obfuscate.
+#' @param oauth_auth_url oauth authentication URL
+#' @param oauth_redirect_url oauth redirect URL
+#' @param oauth_offline_token oauth offline token. A offline token is a refresh token that does not expire at the end of a session.
 #' @param url_staging URL of staging API
 #' @param url_production URL of production API
 #' @param url_test URL of test API
@@ -36,12 +35,11 @@
 #' With 'public', you only have access to public time series data. With 'preview', you only have access to a subset of the time series
 #' for which previews are allowed. The time series previews will lack the latest 2 years of data.
 #' @param read_before_release whether time series vintages should be read before their official release. Defaults to TRUE. This option will only have
-#' an effect if you actually have pre release access to the requested time series.
+#' an effect if you have pre release access to the requested time series.
 #' @export
 set_config <- function(
   oauth_client_id = NULL,
   oauth_client_token_url = NULL,
-  oauth_client_key = NULL,
   oauth_client_secret = NULL,
   oauth_auth_url = NULL,
   oauth_redirect_url = NULL,
@@ -58,9 +56,6 @@ set_config <- function(
   }
   if(!is.null(oauth_client_token_url)) {
     options(tsdbapi.oauth_client_token_url = oauth_client_token_url)
-  }
-  if(!is.null(oauth_client_key)) {
-    options(tsdbapi.oauth_client_key = oauth_client_key)
   }
   if(!is.null(oauth_client_secret)) {
     options(tsdbapi.oauth_client_secret = oauth_client_secret)
@@ -94,13 +89,34 @@ set_config <- function(
   }
 }
 
+#' Get current package configuration
+#'
+#' @returns named character vector
+#' @export
+get_config <- function() {
+  opts <- c(
+    "oauth_client_id",
+    "oauth_client_token_url",
+    "oauth_client_secret",
+    "oauth_auth_url",
+    "oauth_redirect_url",
+    "oauth_offline_token",
+    "url_staging",
+    "url_production",
+    "url_test",
+    "environment",
+    "access_type",
+    "read_before_release")
+  
+  purrr::map(set_names(opts), ~getOption(paste0("tsdbapi.", .x)))
+}
+
 get_oauth_client <- function() {
   httr2::oauth_client(
     id = getOption("tsdbapi.oauth_client_id"),
     token_url = getOption("tsdbapi.oauth_client_token_url"),
     auth = "body",
-    # secret = httr2::obfuscated(getOption("tsdbapi.oauth_client_secret")),
-    secret = getOption("tsdbapi.oauth_client_secret")
+    secret = httr2::obfuscated(getOption("tsdbapi.oauth_client_secret"))
   )
 } 
 

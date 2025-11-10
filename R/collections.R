@@ -1,12 +1,16 @@
 
+collection_base_url <- function(collection, owner) {
+  paste0(base_url(), "collections/", owner, "/", collection, "/")
+}
+
 #' Read information on existing time series collections.
 #'
 #' @family time series collection functions
 #' @return table with a row for every existing collection
 #' @export
-list_collections <- function() {
+list_collections <- function(owner = "self") {
   
-  url <- paste0(base_url(), "collections")
+  url <- paste0(base_url(), "collections/", if(is.null(owner)) "" else owner)
   res <- req_base(url) %>% httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
@@ -18,15 +22,14 @@ list_collections <- function() {
 #' @param description description of the collection
 #' @param owner username of the owner of the collection. By default, the username of the authenticating user is taken.
 #' @export
-create_collection <- function(collection, description, owner = NULL) {
+create_collection <- function(collection, description, owner = "self") {
   
-  url <- paste0(base_url(), "collections/", collection)
+  url <- collection_base_url(collection, owner)
   
   data <- list(description = description)
   
   res <- req_base(url) %>%
     httr2::req_method("PUT") %>% 
-    httr2::req_url_query(owner = owner) %>%
     httr2::req_body_json(data) %>%
     httr2::req_perform()
   
@@ -38,13 +41,12 @@ create_collection <- function(collection, description, owner = NULL) {
 #' @inheritParams param_defs
 #' @family time series collection functions
 #' @export
-delete_collection <- function(collection, owner = NULL) {
+delete_collection <- function(collection, owner = "self") {
   
-  url <- paste0(base_url(), "collections/", collection)
+  url <- collection_base_url(collection, owner)
   
   res <- req_base(url) %>%
     httr2::req_method("DELETE") %>% 
-    httr2::req_url_query(owner = owner) %>%
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -57,17 +59,16 @@ delete_collection <- function(collection, owner = NULL) {
 #' @export
 read_collection_ts <- function(
     collection,
+    owner = "self",
     valid_on = Sys.Date(),
-    owner = NULL,
     ignore_missing = F) {
   
-  url <- paste0(base_url(), "collections/", collection, "/ts")
+  url <- paste0(collection_base_url(collection, owner), "ts")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       df="Y-m-d",
       mime="json",
-      owner=owner,
       valid_on=as.character(valid_on),
       ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
@@ -86,19 +87,17 @@ read_collection_ts <- function(
 read_collection_ts_metadata <- function(
     collection,
     locale=c("de","en","fr","it","unlocalized"),
-    owner = NULL,
+    owner = "self",
     ignore_missing = F) {
   
   locale <- match.arg(locale)
   
-  url <- paste0(base_url(), "collections/", collection ,"/ts/metadata")
+  url <- paste0(collection_base_url(collection, owner), "ts/metadata")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       locale=locale,
-      owner=owner,
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -114,19 +113,17 @@ read_collection_ts_history <- function(
     collection,
     valid_from = as.Date("1900-01-01"),
     valid_to = Sys.Date(),
-    owner = NULL,
+    owner = "self",
     ignore_missing = F) {
   
-  url <- paste0(base_url(), "collections/", collection ,"/ts/history")
+  url <- paste0(collection_base_url(collection, owner), "ts/history")
   
   res <- req_base(url) %>%
     httr2::req_url_query(
       df="Y-m-d",
-      start = as.character(start),
-      end = as.character(end),
-      owner=owner,
-      ignore_missing=to_bool_query_param(ignore_missing),
-      access_type=access_type) %>%
+      valid_from = as.character(valid_from),
+      valid_to = as.character(valid_to),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
@@ -142,12 +139,12 @@ read_collection_ts_history <- function(
 #' @export
 read_collection_keys <- function(
     collection,
-    owner = NULL) {
+    owner = "self") {
   
-  url <- paste0(base_url(), "collections/", collection, "/keys")
+  url <- paste0(collection_base_url(collection, owner), "keys")
   
   res <- req_base(url) %>%
-    httr2::req_url_query(mime="csv", owner=owner) %>%
+    httr2::req_url_query(mime="csv") %>%
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -160,17 +157,16 @@ read_collection_keys <- function(
 #' @export
 add_ts_to_collection <- function(
     collection,
+    owner = "self",
     ts_keys,
-    owner = NULL,
     ignore_missing = F) {
   
-  url <- paste0(base_url(), "collections/", collection)
+  url <- collection_base_url(collection, owner)
   
   data <- list(keys=ts_keys, operation=unbox("add"), ignore_missing=unbox(ignore_missing))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
-    httr2::req_url_query(owner=owner) %>%
     httr2::req_body_json(data, auto_unbox = F) %>%
     httr2::req_perform()
   
@@ -184,18 +180,109 @@ add_ts_to_collection <- function(
 #' @export
 remove_ts_from_collection <- function(
     collection,
-    ts_keys,
-    owner = NULL) {
+    owner = "self",
+    ts_keys) {
   
-  url <- paste0(base_url(), "collections/", collection)
+  url <- collection_base_url(collection, owner)
   
   data <- list(keys=ts_keys, operation=unbox("remove"))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
-    httr2::req_url_query(owner=owner) %>%
     httr2::req_body_json(data, auto_unbox = F) %>%
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
+}
+
+#' Read the time at which time series vintages were written
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with update time for every time series key
+#' @export
+read_collection_ts_update_time <- function(
+    collection,
+    owner = "self",
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(collection_base_url(collection, owner), "ts/update-time")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release history of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and release
+#' @export
+read_collection_ts_release <- function(
+    collection,
+    owner = "self",
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(collection_base_url(collection, owner), "ts/release")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release history of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and release
+#' @export
+read_collection_ts_release_history <- function(
+    collection,
+    owner = "self",
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(collection_base_url(collection, owner), "ts/release/history")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_from=as.character(valid_from),
+      valid_to=as.character(valid_to),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the future releases of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and future release
+#' @export
+read_collection_ts_release_future <- function(
+    collection,
+    owner = "self",
+    ignore_missing = F) {
+  
+  url <- paste0(collection_base_url(collection, owner), "ts/release/future")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
 }

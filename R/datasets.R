@@ -64,11 +64,11 @@ create_dataset <- function(
 #' @export
 delete_dataset <- function(dataset) {
   url <- paste0(base_url(), "datasets/", dataset)
-  
+
   res <- req_base(url) %>%
-    httr2::req_method("DELETE") %>% 
+    httr2::req_method("DELETE") %>%
     httr2::req_perform()
-  
+
   cat(httr2::resp_body_json(res)$message)
 }
 
@@ -112,8 +112,8 @@ read_dataset_ts_history <- function(
     httr2::req_url_query(
       df = "Y-m-d",
       mime = "json",
-      start = as.character(start),
-      end = as.character(end),
+      valid_from = as.character(valid_from),
+      valid_to = as.character(valid_to),
       ignore_missing = to_bool_query_param(ignore_missing)) %>%
     httr2::req_perform()
   
@@ -138,3 +138,125 @@ read_dataset_keys <- function(dataset) {
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
+
+#' Read the time at which time series vintages were written
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with update time for every time series key
+#' @export
+read_dataset_ts_update_time <- function(
+    dataset,
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/update-time")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release history of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and release
+#' @export
+read_dataset_ts_release <- function(
+    dataset,
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/release")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_on=as.character(valid_on),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the release history of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and release
+#' @export
+read_dataset_ts_release_history <- function(
+    dataset,
+    valid_from = as.Date("1900-01-01"),
+    valid_to = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/release/history")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      valid_from=as.character(valid_from),
+      valid_to=as.character(valid_to),
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Read the future releases of time series
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return table with release topic, year, period and time for every time series key and future release
+#' @export
+read_dataset_ts_release_future <- function(
+    dataset,
+    ignore_missing = F) {
+  
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/release/future")
+  
+  res <- req_base(url) %>%
+    httr2::req_url_query(
+      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}
+
+#' Title
+#'
+#' @param dataset 
+#' @param release_name 
+#' @param release_year 
+#' @param release_period 
+#' @param valid_on 
+#' @export
+write_dataset_ts_release <- function(
+    dataset,
+    release_topic,
+    release_year,
+    release_period,
+    valid_on = Sys.Date(),
+    ignore_missing = F) {
+  
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/release")
+  
+  data <- list(
+    release_topic=unbox(release_topic),
+    release_year=unbox(release_year),
+    release_period=unbox(release_period),
+    valid_on=unbox(as.character(valid_on)),
+    ignore_missing=unbox(to_bool_query_param(ignore_missing)))
+  
+  res <- req_base(url) %>%
+    httr2::req_method("PATCH") %>% 
+    httr2::req_body_json(data, auto_unbox = F) %>% 
+    httr2::req_perform()
+  
+  cat(httr2::resp_body_json(res)$message)
+}
+
