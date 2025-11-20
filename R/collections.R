@@ -163,7 +163,7 @@ add_ts_to_collection <- function(
   
   url <- collection_base_url(collection, owner)
   
-  data <- list(keys=ts_keys, operation=unbox("add"), ignore_missing=unbox(ignore_missing))
+  data <- list(keys=ts_keys, operation=httr2::unbox("add"), ignore_missing=httr2::unbox(ignore_missing))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
@@ -185,7 +185,7 @@ remove_ts_from_collection <- function(
   
   url <- collection_base_url(collection, owner)
   
-  data <- list(keys=ts_keys, operation=unbox("remove"))
+  data <- list(keys=ts_keys, operation=httr2::unbox("remove"))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 

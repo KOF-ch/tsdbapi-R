@@ -103,18 +103,18 @@ write_ts <- function(
   url <- ts_base_url()
 
   data <- list(
-    valid_from=unbox(valid_from),
-    release_time=unbox(release_time),
-    release_topic=unbox(release_topic),
-    release_year=unbox(release_year),
-    release_period=unbox(release_period),
+    valid_from=httr2::unbox(valid_from),
+    release_time=httr2::unbox(release_time),
+    release_topic=httr2::unbox(release_topic),
+    release_year=httr2::unbox(release_year),
+    release_period=httr2::unbox(release_period),
     access_sets=access_sets,
-    access=unbox(access),
-    pre_release_access=unbox(pre_release_access))
+    access=httr2::unbox(access),
+    pre_release_access=httr2::unbox(pre_release_access))
   
   data$ts_data <- unname(imap(ts_list, ~{
     freq <- if(is.ts(.x)) frequency(.x) else NULL
-    list(ts_key=unbox(.y), frequency=unbox(freq), time=zoo::as.Date(.x), value=as.vector(.x))
+    list(ts_key=httr2::unbox(.y), frequency=httr2::unbox(freq), time=zoo::as.Date(.x), value=as.vector(.x))
   }))
   
   res <- req_base(url) %>%
@@ -142,7 +142,7 @@ rename_ts <- function(
   data <- list(
     keys=ts_keys,
     keys_new=ts_keys_new,
-    ignore_missing=unbox(to_bool_query_param(ignore_missing)))
+    ignore_missing=httr2::unbox(to_bool_query_param(ignore_missing)))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
@@ -260,10 +260,10 @@ write_ts_release <- function(
   
   data <- list(
     keys=ts_keys,
-    release_topic=unbox(release_topic),
-    release_year=unbox(release_year),
-    release_period=unbox(release_period),
-    valid_on=unbox(as.character(valid_on)))
+    release_topic=httr2::unbox(release_topic),
+    release_year=httr2::unbox(release_year),
+    release_period=httr2::unbox(release_period),
+    valid_on=httr2::unbox(as.character(valid_on)))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
@@ -295,7 +295,7 @@ write_ts_metadata <- function(
     valid_from = valid_from,
     locale = locale,
     metadata = unname(imap(metadata_list, ~{
-      list(ts_key=unbox(.y), metadata=.x)
+      list(ts_key=httr2::unbox(.y), metadata=.x)
     }))
   )
   
@@ -318,7 +318,7 @@ write_ts_dataset <- function(
   
   url <- paste0(ts_base_url(), "dataset")
   
-  data <- list(keys=ts_keys, dataset=unbox(dataset))
+  data <- list(keys=ts_keys, dataset=httr2::unbox(dataset))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
@@ -364,7 +364,7 @@ delete_ts <- function(
   
   data <- list(
     keys=ts_keys,
-    ignore_missing=unbox(to_bool_query_param(ignore_missing)))
+    ignore_missing=httr2::unbox(to_bool_query_param(ignore_missing)))
   
   res <- req_base(url) %>%
     httr2::req_method("DELETE") %>% 

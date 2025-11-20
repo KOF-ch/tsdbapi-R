@@ -55,7 +55,7 @@ add_user_access_sets <- function(
   
   url <- paste0(user_base_url(username), "access-sets")
   
-  data <- list(access_sets=access_sets, operation=unbox("add"), permission=unbox(permission))
+  data <- list(access_sets=access_sets, operation=httr2::unbox("add"), permission=httr2::unbox(permission))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>%
@@ -76,7 +76,7 @@ remove_user_access_sets <- function(
   
   url <- paste0(user_base_url(username), "access-sets")
   
-  data <- list(access_sets=access_sets, operation=unbox("remove"))
+  data <- list(access_sets=access_sets, operation=httr2::unbox("remove"))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>%
