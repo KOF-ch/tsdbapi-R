@@ -1,7 +1,7 @@
 
 #' Read information on existing time series datasets.
 #' 
-#' @family time series dataset functions
+#' @family dataset functions
 #' @return table with a row for every existing dataset
 #' @export
 list_datasets <- function() {
@@ -14,7 +14,7 @@ list_datasets <- function() {
 #' Read all time series of a time series dataset
 #'
 #' @inheritParams param_defs
-#' @family time series dataset functions
+#' @family dataset functions
 #' @return List of time series. Regular time series have the class ts and irregular time series the class xts.
 #' @export
 read_dataset_ts <- function(
@@ -40,7 +40,7 @@ read_dataset_ts <- function(
 #' Create a time series dataset
 #'
 #' @inheritParams param_defs
-#' @family time series dataset functions
+#' @family dataset functions
 #' @export
 create_dataset <- function(
     dataset,
@@ -60,7 +60,7 @@ create_dataset <- function(
 #' Delete an existing time series dataset
 #'
 #' @inheritParams param_defs
-#' @family time series dataset functions
+#' @family dataset functions
 #' @export
 delete_dataset <- function(dataset) {
   url <- paste0(base_url(), "datasets/", dataset)
@@ -75,7 +75,7 @@ delete_dataset <- function(dataset) {
 #' Read the metadata of all time series of a time series dataset.
 #'
 #' @inheritParams param_defs
-#' @family time series dataset functions
+#' @family dataset functions
 #' @return List of time series metadata. Each list element contains the metadata of a particular time series as a list.
 #' @export
 read_dataset_ts_metadata <- function(
@@ -97,7 +97,7 @@ read_dataset_ts_metadata <- function(
 #' Read the history of all time series of a time series dataset (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
-#' @family time series dataset functions
+#' @family dataset functions
 #' @return  List of time series. The name of each time series includes the vintage date, i.e. the date at which the particular version of the series became valid.
 #' @export
 read_dataset_ts_history <- function(
@@ -125,7 +125,7 @@ read_dataset_ts_history <- function(
 #' Read the keys of the time series in a time series dataset.
 #'
 #' @inheritParams param_defs
-#' @family time series datset functions
+#' @family dataset functions
 #' @return character vector of time series keys
 #' @export
 read_dataset_keys <- function(dataset) {
@@ -142,7 +142,7 @@ read_dataset_keys <- function(dataset) {
 #' Read the time at which time series vintages were written
 #'
 #' @inheritParams param_defs
-#' @family time series functions
+#' @family dataset functions
 #' @return table with update time for every time series key
 #' @export
 read_dataset_ts_update_time <- function(
@@ -164,7 +164,7 @@ read_dataset_ts_update_time <- function(
 #' Read the release history of time series
 #'
 #' @inheritParams param_defs
-#' @family time series functions
+#' @family dataset functions
 #' @return table with release topic, year, period and time for every time series key and release
 #' @export
 read_dataset_ts_release <- function(
@@ -186,7 +186,7 @@ read_dataset_ts_release <- function(
 #' Read the release history of time series
 #'
 #' @inheritParams param_defs
-#' @family time series functions
+#' @family dataset functions
 #' @return table with release topic, year, period and time for every time series key and release
 #' @export
 read_dataset_ts_release_history <- function(
@@ -210,7 +210,7 @@ read_dataset_ts_release_history <- function(
 #' Read the future releases of time series
 #'
 #' @inheritParams param_defs
-#' @family time series functions
+#' @family dataset functions
 #' @return table with release topic, year, period and time for every time series key and future release
 #' @export
 read_dataset_ts_release_future <- function(
@@ -227,13 +227,10 @@ read_dataset_ts_release_future <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Title
+#' Write the release for all time series of a dataset.
 #'
-#' @param dataset 
-#' @param release_name 
-#' @param release_year 
-#' @param release_period 
-#' @param valid_on 
+#' @inheritParams param_defs
+#' @family dataset functions
 #' @export
 write_dataset_ts_release <- function(
     dataset,

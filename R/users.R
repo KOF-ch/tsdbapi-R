@@ -97,9 +97,10 @@ read_user_quota <- function(username = "self") {
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Title
+#' Create the quota for a new data service subscription
 #'
-#' @param username 
+#' @inheritParams param_defs
+#' @family user management functions
 #' @param package_annual_quota 
 #' @param subscription_start_time 
 #' @export
@@ -116,11 +117,11 @@ create_user_quota <- function(username, package_annual_quota, subscription_start
   cat(httr2::resp_body_json(res)$message)
 }
 
-#' Title
+#' Write the quota for a data service subscriber
 #'
-#' @param username 
-#' @param package_annual_quota 
-#' @param subscription_start_time 
+#' @inheritParams param_defs
+#' @family user management functions
+#' @param package_annual_quota
 #' @export
 write_user_quota <- function(username, current_annual_quota = NULL, package_annual_quota = NULL) {
   
@@ -135,9 +136,10 @@ write_user_quota <- function(username, current_annual_quota = NULL, package_annu
   cat(httr2::resp_body_json(res)$message)
 }
 
-#' Title
+#' Delete the existing quota of a data service subscriber
 #'
-#' @param username 
+#' @inheritParams param_defs
+#' @family user management functions
 #' @export
 delete_user_quota <- function(username) {
   

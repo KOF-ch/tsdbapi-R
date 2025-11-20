@@ -5,7 +5,9 @@
     tsdbapi.oauth_client_token_url = Sys.getenv("TSDBAPI_OAUTH_CLIENT_TOKEN_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/token"),
     tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "6rZ4TmOPbKKa1oWqbPOH4RxFbMCHCEr0g9ybz91jJ5Mt7GIktdrWx5F4KykoukxV"),
     tsdbapi.oauth_auth_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth"),
+    tsdbapi.oauth_auth_device_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_DEVICE_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth/device"),
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://localhost:1011"),
+    tsdbapi.oauth_flow = Sys.getenv("TSDBAPI_OAUTH_FLOW", unset = if(httr2:::is_hosted_session()) "device" else "code"),
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
     tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2"),
     tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2"),
@@ -42,6 +44,8 @@ set_config <- function(
   oauth_client_token_url = NULL,
   oauth_client_secret = NULL,
   oauth_auth_url = NULL,
+  oauth_auth_device_url = NULL,
+  oauth_flow = NULL,
   oauth_redirect_url = NULL,
   oauth_offline_token = NULL,
   url_staging = NULL,
@@ -60,7 +64,13 @@ set_config <- function(
   if(!is.null(oauth_client_secret)) {
     options(tsdbapi.oauth_client_secret = oauth_client_secret)
   }
+  if(!is.null(oauth_flow)) {
+    options(tsdbapi.oauth_flow = oauth_flow)
+  }
   if(!is.null(oauth_auth_url)) {
+    options(tsdbapi.oauth_auth_url = oauth_auth_url)
+  }
+  if(!is.null(oauth_auth_device_url)) {
     options(tsdbapi.oauth_auth_url = oauth_auth_url)
   }
   if(!is.null(oauth_redirect_url)) {
@@ -98,7 +108,9 @@ get_config <- function() {
     "oauth_client_id",
     "oauth_client_token_url",
     "oauth_client_secret",
+    "oauth_flow",
     "oauth_auth_url",
+    "oauth_auth_device_url",
     "oauth_redirect_url",
     "oauth_offline_token",
     "url_staging",
@@ -126,11 +138,20 @@ get_oauth_client <- function() {
 #' @returns offline token
 #' @export
 get_offline_token <- function(set_option = T) {
-  res <- httr2::oauth_flow_auth_code(
-    client = get_oauth_client(),
-    redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
-    auth_url = getOption("tsdbapi.oauth_auth_url"),
-    auth_params = list(scope="offline_access"))
+  if(getOption("tsdbapi.oauth_flow")=="device") {
+    res <- httr2::oauth_flow_device(
+      client = get_oauth_client(),
+      scope = "offline_access",
+      auth_url = getOption("tsdbapi.oauth_auth_device_url"),
+    )
+  } else {
+    res <- httr2::oauth_flow_auth_code(
+      client = get_oauth_client(),
+      redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
+      auth_url = getOption("tsdbapi.oauth_auth_url"),
+      auth_params = list(scope="offline_access")
+    )
+  }
   
   if(set_option) {
     options(tsdbapi.oauth_offline_token = res$refresh_token)
@@ -146,10 +167,16 @@ req_base <- function(url) {
   offline_token <- getOption("tsdbapi.oauth_offline_token")
   
   if(offline_token == "") {
-    req <- req %>% httr2::req_oauth_auth_code(
-      client = get_oauth_client(),
-      redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
-      auth_url = getOption("tsdbapi.oauth_auth_url"))
+    if(getOption("tsdbapi.oauth_flow")=="device") {
+      req <- req %>% httr2::req_oauth_device(
+        client = get_oauth_client(),
+        auth_url = getOption("tsdbapi.oauth_auth_device_url"))
+    } else {
+      req <- req %>% httr2::req_oauth_auth_code(
+        client = get_oauth_client(),
+        redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
+        auth_url = getOption("tsdbapi.oauth_auth_url"))
+    }
   } else {
     req <- req %>% httr2::req_oauth_refresh(client, refresh_token = offline_token)
   }
