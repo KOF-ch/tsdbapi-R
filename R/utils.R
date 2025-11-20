@@ -9,8 +9,8 @@
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://localhost:1011"),
     tsdbapi.oauth_flow = Sys.getenv("TSDBAPI_OAUTH_FLOW", unset = if(httr2:::is_hosted_session()) "device" else "code"),
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
-    tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2"),
-    tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2"),
+    tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2/"),
+    tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2/"),
     tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/"),
     tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production"),
     tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "oauth"),
@@ -178,7 +178,7 @@ req_base <- function(url) {
         auth_url = getOption("tsdbapi.oauth_auth_url"))
     }
   } else {
-    req <- req %>% httr2::req_oauth_refresh(client, refresh_token = offline_token)
+    req <- req %>% httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
   }
 
   req %>% httr2::req_url_query(
