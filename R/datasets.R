@@ -243,11 +243,11 @@ write_dataset_ts_release <- function(
   url <- paste0(base_url(), "datasets/", dataset, "/ts/release")
   
   data <- list(
-    release_topic=httr2::unbox(release_topic),
-    release_year=httr2::unbox(release_year),
-    release_period=httr2::unbox(release_period),
-    valid_on=httr2::unbox(as.character(valid_on)),
-    ignore_missing=httr2::unbox(to_bool_query_param(ignore_missing)))
+    release_topic=jsonlite::unbox(release_topic),
+    release_year=jsonlite::unbox(release_year),
+    release_period=jsonlite::unbox(release_period),
+    valid_on=jsonlite::unbox(as.character(valid_on)),
+    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 

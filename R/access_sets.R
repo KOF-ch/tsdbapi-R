@@ -70,8 +70,8 @@ add_ts_to_access_set <- function(access_set, ts_keys, ignore_missing = F) {
   
   data <- list(
     keys=ts_keys,
-    operation=httr2::unbox("add"),
-    ignore_missing=httr2::unbox(to_bool_query_param(ignore_missing)))
+    operation=jsonlite::unbox("add"),
+    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
@@ -92,7 +92,7 @@ remove_ts_from_access_set <- function(access_set, ts_keys) {
   
   data <- list(
     keys=ts_keys,
-    operation=httr2::unbox("remove"))
+    operation=jsonlite::unbox("remove"))
   
   res <- req_base(url) %>%
     httr2::req_method("PATCH") %>% 
