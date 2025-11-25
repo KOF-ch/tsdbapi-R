@@ -10,7 +10,7 @@ user_base_url <- function(username) {
 #' @export
 list_users <- function() {
   url <- paste0(base_url(), "users")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))  
 }
 
@@ -23,9 +23,9 @@ create_user <- function(username, role) {
   url <- user_base_url(username)
   data <- list(role=role)
   
-  res <- req_base(url) %>%
-    httr2::req_method("PUT") %>%
-    httr2::req_body_json(data) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |>
+    httr2::req_body_json(data) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -39,7 +39,7 @@ create_user <- function(username, role) {
 #' @export
 list_user_access_sets <- function(username = "self") {
   url <- paste0(user_base_url(username), "access-sets")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))  
 }
 
@@ -57,9 +57,9 @@ add_user_access_sets <- function(
   
   data <- list(access_sets=access_sets, operation=jsonlite::unbox("add"), permission=jsonlite::unbox(permission))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>%
-    httr2::req_body_json(data, auto_unbox = F) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |>
+    httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message, "\n")
@@ -78,9 +78,9 @@ remove_user_access_sets <- function(
   
   data <- list(access_sets=access_sets, operation=jsonlite::unbox("remove"))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>%
-    httr2::req_body_json(data, auto_unbox = F) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |>
+    httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -93,7 +93,7 @@ remove_user_access_sets <- function(
 read_user_quota <- function(username = "self") {
 
   url <- paste0(user_base_url(username), "quota")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
@@ -109,9 +109,9 @@ create_user_quota <- function(username, package_annual_quota, subscription_start
   url <- paste0(user_base_url(username), "quota")
   data <- list(subscription_start_time=subscription_start_time, package_annual_quota=package_annual_quota)
   
-  res <- req_base(url) %>%
-    httr2::req_method("PUT") %>%
-    httr2::req_body_json(data) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |>
+    httr2::req_body_json(data) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -128,9 +128,9 @@ write_user_quota <- function(username, current_annual_quota = NULL, package_annu
   url <- paste0(user_base_url(username), "quota")
   data <- list(current_annual_quota=current_annual_quota, package_annual_quota=package_annual_quota)
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>%
-    httr2::req_body_json(data) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |>
+    httr2::req_body_json(data) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -145,8 +145,8 @@ delete_user_quota <- function(username) {
   
   url <- paste0(user_base_url(username), "quota")
 
-  res <- req_base(url) %>%
-    httr2::req_method("DELETE") %>%
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)

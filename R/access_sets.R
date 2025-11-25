@@ -7,7 +7,7 @@
 list_access_sets <- function() {
   
   url <- paste0(base_url(), "access-sets")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
@@ -20,7 +20,7 @@ list_access_sets <- function() {
 read_access_set_keys <- function(access_set) {
   
   url <- paste0(base_url(), "access-sets/", access_set, "/keys")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
@@ -35,9 +35,9 @@ create_access_set <- function(access_set, description) {
   
   data <- list(description=description)
   
-  res <- req_base(url) %>%
-    httr2::req_method("PUT") %>% 
-    httr2::req_body_json(data) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |> 
+    httr2::req_body_json(data) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -52,8 +52,8 @@ delete_access_set <- function(access_set) {
   
   url <- paste0(base_url(), "access-sets/", access_set)
   
-  res <- req_base(url) %>%
-    httr2::req_method("DELETE") %>% 
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -73,9 +73,9 @@ add_ts_to_access_set <- function(access_set, ts_keys, ignore_missing = F) {
     operation=jsonlite::unbox("add"),
     ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -94,9 +94,9 @@ remove_ts_from_access_set <- function(access_set, ts_keys) {
     keys=ts_keys,
     operation=jsonlite::unbox("remove"))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)

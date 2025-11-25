@@ -16,17 +16,17 @@ read_ts <- function(
 
   url <- ts_base_url()
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       df="Y-m-d",
       mime="json",
       keys=paste0(ts_keys, collapse = ","),
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
-  names(data) <- map_chr(data, "ts_key")
+  names(data) <- purrr::map_chr(data, "ts_key")
   lapply(data, json_to_ts)
 }
 
@@ -44,18 +44,18 @@ read_ts_history <- function(
   
   url <- paste0(ts_base_url(), "history")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       df="Y-m-d",
       mime="json",
       keys=paste0(ts_keys, collapse = ","),
       valid_from=as.character(valid_from),
       valid_to=as.character(valid_to),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
 
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
-  names(data) <- map_chr(data, ~paste0(.x$ts_key, "_", .x$validity))
+  names(data) <- purrr::map_chr(data, ~paste0(.x$ts_key, "_", stringr::str_replace_all(.x$validity, "-", "")))
   lapply(data, json_to_ts)
 }
 
@@ -74,11 +74,11 @@ read_ts_metadata <- function(
   
   url <- paste0(ts_base_url(), "metadata")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       locale=locale, 
       keys=paste0(ts_keys, collapse = ","),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -117,9 +117,9 @@ write_ts <- function(
     list(ts_key=jsonlite::unbox(.y), frequency=jsonlite::unbox(freq), time=zoo::as.Date(.x), value=as.vector(.x))
   }))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PUT") %>% 
-    httr2::req_body_json(data, auto_unbox = F, null = "null", na = "null") %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |> 
+    httr2::req_body_json(data, auto_unbox = F, null = "null", na = "null") |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message, "\n")
@@ -144,9 +144,9 @@ rename_ts <- function(
     keys_new=ts_keys_new,
     ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -165,11 +165,11 @@ read_ts_update_time <- function(
   
   url <- paste0(ts_base_url(), "update-time")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -188,11 +188,11 @@ read_ts_release <- function(
   
   url <- paste0(ts_base_url(), "release")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -212,12 +212,12 @@ read_ts_release_history <- function(
   
   url <- paste0(ts_base_url(), "release/history")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
       valid_from=as.character(valid_from),
       valid_to=as.character(valid_to),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -235,10 +235,10 @@ read_ts_release_future <- function(
   
   url <- paste0(ts_base_url(), "release/future")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -265,9 +265,9 @@ write_ts_release <- function(
     release_period=jsonlite::unbox(release_period),
     valid_on=jsonlite::unbox(as.character(valid_on)))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -299,9 +299,9 @@ write_ts_metadata <- function(
     }))
   )
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message, "\n")
@@ -320,9 +320,9 @@ write_ts_dataset <- function(
   
   data <- list(keys=ts_keys, dataset=jsonlite::unbox(dataset))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -340,10 +340,10 @@ read_ts_dataset <- function(
   
   url <- paste0(ts_base_url(), "dataset")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       keys=paste0(ts_keys, collapse = ","),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -366,9 +366,9 @@ delete_ts <- function(
     keys=ts_keys,
     ignore_missing=unbox(to_bool_query_param(ignore_missing)))
   
-  res <- req_base(url) %>%
-    httr2::req_method("DELETE") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |> 
+    httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -386,8 +386,8 @@ find_ts <- function(
   
   url <- paste0(ts_base_url(), "key")
   
-  res <- req_base(url) %>%
-    httr2::req_url_query(regexp=regexp) %>%
+  res <- req_base(url) |>
+    httr2::req_url_query(regexp=regexp) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))

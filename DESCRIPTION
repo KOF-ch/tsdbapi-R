@@ -5,8 +5,8 @@ Description: A package with functions to read and write time series data from a 
 Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
 Depends:
   R (>= 3.3),
-  purrr
 Imports:
+  purrr,
   xts,
   zoo,
   httr2,

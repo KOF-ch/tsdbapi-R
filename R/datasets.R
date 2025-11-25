@@ -7,7 +7,7 @@
 list_datasets <- function() {
   
   url <- paste0(base_url(), "datasets")
-  res <- req_base(url) %>% httr2::req_perform()
+  res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
@@ -24,16 +24,16 @@ read_dataset_ts <- function(
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       df = "Y-m-d",
       mime = "json",
       valid_on = as.character(valid_on),
-      ignore_missing = to_bool_query_param(ignore_missing)) %>%
+      ignore_missing = to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
-  names(data) <- map_chr(data, "ts_key")
+  names(data) <- purrr::map_chr(data, "ts_key")
   lapply(data, json_to_ts)
 }
 
@@ -49,9 +49,9 @@ create_dataset <- function(
   
   data <- list(description=description)
   
-  res <- req_base(url) %>%
-    httr2::req_method("PUT") %>% 
-    httr2::req_body_json(data) %>%
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |> 
+    httr2::req_body_json(data) |>
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)
@@ -65,8 +65,8 @@ create_dataset <- function(
 delete_dataset <- function(dataset) {
   url <- paste0(base_url(), "datasets/", dataset)
 
-  res <- req_base(url) %>%
-    httr2::req_method("DELETE") %>%
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |>
     httr2::req_perform()
 
   cat(httr2::resp_body_json(res)$message)
@@ -87,8 +87,8 @@ read_dataset_ts_metadata <- function(
   
   url <- paste0(base_url(), "datasets/", dataset ,"/ts/metadata")
   
-  res <- req_base(url) %>%
-    httr2::req_url_query(locale = locale, ignore_missing = to_bool_query_param(ignore_missing)) %>%
+  res <- req_base(url) |>
+    httr2::req_url_query(locale = locale, ignore_missing = to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -108,17 +108,17 @@ read_dataset_ts_history <- function(
   
   url <- paste0(base_url(), "datasets/", dataset ,"/ts/history")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       df = "Y-m-d",
       mime = "json",
       valid_from = as.character(valid_from),
       valid_to = as.character(valid_to),
-      ignore_missing = to_bool_query_param(ignore_missing)) %>%
+      ignore_missing = to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
-  names(data) <- map_chr(data, ~paste0(.x$ts_key, "_", .x$validity))
+  names(data) <- purrr::map_chr(data, ~paste0(.x$ts_key, "_", .x$validity))
   lapply(data, json_to_ts)
 }
 
@@ -132,8 +132,8 @@ read_dataset_keys <- function(dataset) {
   
   url <- paste0(base_url(), "datasets/", dataset, "/keys")
   
-  res <- req_base(url) %>% 
-    httr2::req_url_query(mime="csv") %>%
+  res <- req_base(url) |> 
+    httr2::req_url_query(mime="csv") |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -152,10 +152,10 @@ read_dataset_ts_update_time <- function(
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts/update-time")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -174,10 +174,10 @@ read_dataset_ts_release <- function(
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts/release")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       valid_on=as.character(valid_on),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -197,11 +197,11 @@ read_dataset_ts_release_history <- function(
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts/release/history")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
       valid_from=as.character(valid_from),
       valid_to=as.character(valid_to),
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -219,9 +219,9 @@ read_dataset_ts_release_future <- function(
   
   url <- paste0(base_url(), "datasets/", dataset, "/ts/release/future")
   
-  res <- req_base(url) %>%
+  res <- req_base(url) |>
     httr2::req_url_query(
-      ignore_missing=to_bool_query_param(ignore_missing)) %>%
+      ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res))
@@ -249,9 +249,9 @@ write_dataset_ts_release <- function(
     valid_on=jsonlite::unbox(as.character(valid_on)),
     ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
-  res <- req_base(url) %>%
-    httr2::req_method("PATCH") %>% 
-    httr2::req_body_json(data, auto_unbox = F) %>% 
+  res <- req_base(url) |>
+    httr2::req_method("PATCH") |> 
+    httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
   cat(httr2::resp_body_json(res)$message)

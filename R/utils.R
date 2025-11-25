@@ -120,7 +120,8 @@ get_config <- function() {
     "access_type",
     "read_before_release")
   
-  purrr::map(set_names(opts), ~getOption(paste0("tsdbapi.", .x)))
+  names(opts) <- opts
+  purrr::map(opts, ~getOption(paste0("tsdbapi.", .x)))
 }
 
 get_oauth_client <- function() {
@@ -162,26 +163,26 @@ get_offline_token <- function(set_option = T) {
 
 req_base <- function(url) {
   
-  req <- httr2::request(url) %>% httr2::req_error(body = function(res) httr2::resp_body_json(res)$message)
+  req <- httr2::request(url) |> httr2::req_error(body = function(res) httr2::resp_body_json(res)$message)
   
   offline_token <- getOption("tsdbapi.oauth_offline_token")
   
   if(offline_token == "") {
     if(getOption("tsdbapi.oauth_flow")=="device") {
-      req <- req %>% httr2::req_oauth_device(
+      req <- req |> httr2::req_oauth_device(
         client = get_oauth_client(),
         auth_url = getOption("tsdbapi.oauth_auth_device_url"))
     } else {
-      req <- req %>% httr2::req_oauth_auth_code(
+      req <- req |> httr2::req_oauth_auth_code(
         client = get_oauth_client(),
         redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
         auth_url = getOption("tsdbapi.oauth_auth_url"))
     }
   } else {
-    req <- req %>% httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
+    req <- req |> httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
   }
 
-  req %>% httr2::req_url_query(
+  req |> httr2::req_url_query(
     access_type = getOption("tsdbapi.access_type"),
     read_before_release = to_bool_query_param(getOption("tsdbapi.read_before_release"))
   )
