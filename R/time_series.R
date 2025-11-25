@@ -112,7 +112,7 @@ write_ts <- function(
     access=jsonlite::unbox(access),
     pre_release_access=jsonlite::unbox(pre_release_access))
   
-  data$ts_data <- unname(imap(ts_list, ~{
+  data$ts_data <- unname(purrr::imap(ts_list, ~{
     freq <- if(is.ts(.x)) frequency(.x) else NULL
     list(ts_key=jsonlite::unbox(.y), frequency=jsonlite::unbox(freq), time=zoo::as.Date(.x), value=as.vector(.x))
   }))
@@ -294,7 +294,7 @@ write_ts_metadata <- function(
     overwrite = to_bool_query_param(overwrite),
     valid_from = valid_from,
     locale = locale,
-    metadata = unname(imap(metadata_list, ~{
+    metadata = unname(purrr::imap(metadata_list, ~{
       list(ts_key=jsonlite::unbox(.y), metadata=.x)
     }))
   )
