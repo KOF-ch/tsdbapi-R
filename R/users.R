@@ -123,10 +123,10 @@ create_user_quota <- function(username, package_annual_quota, subscription_start
 #' @family user management functions
 #' @param package_annual_quota
 #' @export
-write_user_quota <- function(username, current_annual_quota = NULL, package_annual_quota = NULL) {
+write_user_quota <- function(username, current_year_quota = NULL, package_annual_quota = NULL) {
   
   url <- paste0(user_base_url(username), "quota")
-  data <- list(current_annual_quota=current_annual_quota, package_annual_quota=package_annual_quota)
+  data <- list(current_year_quota=current_year_quota, package_annual_quota=package_annual_quota)
   
   res <- req_base(url) |>
     httr2::req_method("PATCH") |>
