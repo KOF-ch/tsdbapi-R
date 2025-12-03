@@ -8,7 +8,7 @@ list_datasets <- function() {
   
   url <- paste0(base_url(), "datasets")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read all time series of a time series dataset
@@ -136,7 +136,7 @@ read_dataset_keys <- function(dataset) {
     httr2::req_url_query(mime="csv") |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
 #' Read the time at which time series vintages were written
@@ -158,7 +158,7 @@ read_dataset_ts_update_time <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the release history of time series
@@ -180,7 +180,7 @@ read_dataset_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the release history of time series
@@ -204,7 +204,7 @@ read_dataset_ts_release_history <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the future releases of time series
@@ -224,7 +224,7 @@ read_dataset_ts_release_future <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Write the release for all time series of a dataset.

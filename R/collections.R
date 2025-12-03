@@ -12,7 +12,7 @@ list_collections <- function(owner = "self") {
   
   url <- paste0(base_url(), "collections/", if(is.null(owner)) "" else owner)
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Create a time series collection.
@@ -147,7 +147,7 @@ read_collection_keys <- function(
     httr2::req_url_query(mime="csv") |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
 #' Adds existing time series (given by their keys) to a time series collection.
@@ -238,7 +238,7 @@ read_collection_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the release history of time series
@@ -263,7 +263,7 @@ read_collection_ts_release_history <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the future releases of time series
@@ -284,5 +284,5 @@ read_collection_ts_release_future <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }

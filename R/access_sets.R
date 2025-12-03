@@ -8,7 +8,7 @@ list_access_sets <- function() {
   
   url <- paste0(base_url(), "access-sets")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the keys of the time series in a time series access set.
@@ -21,7 +21,7 @@ read_access_set_keys <- function(access_set) {
   
   url <- paste0(base_url(), "access-sets/", access_set, "/keys")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
 #' Create a time series access set

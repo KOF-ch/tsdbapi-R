@@ -98,13 +98,13 @@ write_ts <- function(
   release_period = NULL,
   access = NULL,
   pre_release_access = NULL,
-  release_time = NULL) {
+  release_date = NULL) {
   
   url <- ts_base_url()
 
   data <- list(
     valid_from=jsonlite::unbox(valid_from),
-    release_time=jsonlite::unbox(release_time),
+    release_date=jsonlite::unbox(release_date),
     release_topic=jsonlite::unbox(release_topic),
     release_year=jsonlite::unbox(release_year),
     release_period=jsonlite::unbox(release_period),
@@ -172,7 +172,7 @@ read_ts_update_time <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the release history of time series
@@ -195,7 +195,7 @@ read_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the release history of time series
@@ -220,7 +220,7 @@ read_ts_release_history <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Read the future releases of time series
@@ -241,7 +241,7 @@ read_ts_release_future <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Assign time series vintages to a release (given by the release ID).
@@ -346,7 +346,7 @@ read_ts_dataset <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
   
@@ -390,5 +390,5 @@ find_ts <- function(
     httr2::req_url_query(regexp=regexp) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }

@@ -40,7 +40,7 @@ create_user <- function(username, role) {
 list_user_access_sets <- function(username = "self") {
   url <- paste0(user_base_url(username), "access-sets")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))  
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Add access sets with the given permission for a user.
@@ -94,7 +94,7 @@ read_user_quota <- function(username = "self") {
 
   url <- paste0(user_base_url(username), "quota")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
 #' Create the quota for a new data service subscription
