@@ -201,13 +201,13 @@ remove_ts_from_collection <- function(
 #' @family time series functions
 #' @return table with update time for every time series key
 #' @export
-read_collection_ts_update_time <- function(
+read_collection_ts_write_time <- function(
     collection,
     owner = "self",
     valid_on = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(collection_base_url(collection, owner), "ts/update-time")
+  url <- paste0(collection_base_url(collection, owner), "ts/write-time")
   
   res <- req_base(url) |>
     httr2::req_url_query(

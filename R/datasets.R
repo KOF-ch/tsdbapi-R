@@ -145,12 +145,12 @@ read_dataset_keys <- function(dataset) {
 #' @family dataset functions
 #' @return table with update time for every time series key
 #' @export
-read_dataset_ts_update_time <- function(
+read_dataset_ts_write_time <- function(
     dataset,
     valid_on = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(base_url(), "datasets/", dataset, "/ts/update-time")
+  url <- paste0(base_url(), "datasets/", dataset, "/ts/write-time")
   
   res <- req_base(url) |>
     httr2::req_url_query(

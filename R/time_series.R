@@ -158,12 +158,12 @@ rename_ts <- function(
 #' @family time series functions
 #' @return table with update time for every time series key
 #' @export
-read_ts_update_time <- function(
+read_ts_write_time <- function(
     ts_keys,
     valid_on = Sys.Date(),
     ignore_missing = F) {
   
-  url <- paste0(ts_base_url(), "update-time")
+  url <- paste0(ts_base_url(), "write-time")
   
   res <- req_base(url) |>
     httr2::req_url_query(
