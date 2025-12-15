@@ -3,7 +3,9 @@ user_base_url <- function(username) {
   paste0(base_url(), "users/", username, "/")
 }
 
-#' Show information on TSDB users
+#' List users
+#' 
+#' Show information on time series database users.
 #'
 #' @returns table with row for every user
 #' @family user management functions
@@ -14,9 +16,11 @@ list_users <- function() {
   jsonlite::fromJSON(httr2::resp_body_string(res))  
 }
 
-#' Title
+#' Create user
+#' 
+#' Create a time series database user with the given role.
 #'
-#' @param role 
+#' @param role role of user
 #' @export
 create_user <- function(username, role) {
   
@@ -28,9 +32,11 @@ create_user <- function(username, role) {
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' List user access sets
+#' 
 #' List the access sets and associated permissions of a particular user.
 #'
 #' @inheritParams param_defs 
@@ -43,7 +49,9 @@ list_user_access_sets <- function(username = "self") {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Add access sets with the given permission for a user.
+#' Add user access sets
+#' 
+#' Add access sets for a user with a given permission for the time series in the sets.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
@@ -62,11 +70,13 @@ add_user_access_sets <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message, "\n")
+  cat_message(res)
 }
 
-#' Remove access sets for a user.
-#'
+#' Remove user access sets
+#' 
+#' Remove a user's access sets.
+#' 
 #' @inheritParams param_defs
 #' @family user management functions
 #' @export
@@ -83,7 +93,7 @@ remove_user_access_sets <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
 #' Check the number of time series downloads remaining.
@@ -97,12 +107,12 @@ read_user_quota <- function(username = "self") {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Create the quota for a new data service subscription
+#' Create user quota
+#' 
+#' Create a quota for a data service subscriber. Without a quota, a user has an unlimited number of time series downloads.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
-#' @param package_annual_quota 
-#' @param subscription_start_time 
 #' @export
 create_user_quota <- function(username, package_annual_quota, subscription_start_time) {
   
@@ -114,14 +124,15 @@ create_user_quota <- function(username, package_annual_quota, subscription_start
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
-#' Write the quota for a data service subscriber
+#' Write user quota
+#' 
+#' Set the current_year_quota and/or package_annual_quota of a user's quota. 
 #'
 #' @inheritParams param_defs
 #' @family user management functions
-#' @param package_annual_quota
 #' @export
 write_user_quota <- function(username, current_year_quota = NULL, package_annual_quota = NULL) {
   
@@ -133,10 +144,13 @@ write_user_quota <- function(username, current_year_quota = NULL, package_annual
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
-#' Delete the existing quota of a data service subscriber
+#' Delete user quota
+#' 
+#' Delete the existing quota of a data service subscriber.
+#' Without a quota, the user has an unlimited number of time series downloads.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
@@ -149,5 +163,5 @@ delete_user_quota <- function(username) {
     httr2::req_method("DELETE") |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }

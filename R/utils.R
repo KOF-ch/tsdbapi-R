@@ -11,7 +11,7 @@
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
     tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2/"),
     tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2/"),
-    tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/"),
+    tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/v2/"),
     tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production"),
     tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "oauth"),
     tsdbapi.read_before_release = Sys.getenv("TSDBAPI_READ_BEFORE_RELEASE", unset = T)
@@ -213,3 +213,8 @@ base_url <- function() {
     stop("tsdbapi environment ", envir, " not supported")
   }
 }
+
+cat_message <- function(res) {
+  cat(httr2::resp_body_json(res)$message, "\n")
+}
+

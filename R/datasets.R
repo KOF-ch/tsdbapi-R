@@ -1,4 +1,6 @@
 
+#' List datasets
+#' 
 #' Read information on existing time series datasets.
 #' 
 #' @family dataset functions
@@ -11,7 +13,10 @@ list_datasets <- function() {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read all time series of a time series dataset
+#' Read dataset time series
+#' 
+#' Read all time series in a dataset. The vintage to be read is specified by the valid_on parameter.
+#' By default, the most recent vintage is read (valid_on is set to the current date).
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
@@ -37,10 +42,13 @@ read_dataset_ts <- function(
   lapply(data, json_to_ts)
 }
 
-#' Create a time series dataset
+#' Create a dataset
+#' 
+#' Create a time series dataset. Every time series can only be a member of a one dataset.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
+#' @param description description of the dataset
 #' @export
 create_dataset <- function(
     dataset,
@@ -54,9 +62,11 @@ create_dataset <- function(
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' Delete dataset
+#' 
 #' Delete an existing time series dataset
 #'
 #' @inheritParams param_defs
@@ -69,9 +79,11 @@ delete_dataset <- function(dataset) {
     httr2::req_method("DELETE") |>
     httr2::req_perform()
 
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' 
+#' 
 #' Read the metadata of all time series of a time series dataset.
 #'
 #' @inheritParams param_defs
@@ -254,6 +266,6 @@ write_dataset_ts_release <- function(
     httr2::req_body_json(data, auto_unbox = F) |> 
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 

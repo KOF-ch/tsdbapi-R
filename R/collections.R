@@ -3,9 +3,13 @@ collection_base_url <- function(collection, owner) {
   paste0(base_url(), "collections/", owner, "/", collection, "/")
 }
 
+#' List collections
+#' 
 #' Read information on existing time series collections.
+#' By default, the collections of the authenticating user are listed.
+#' To list the collections of another user, provide the username of that user as owner parameter.
 #'
-#' @family time series collection functions
+#' @family collection functions
 #' @return table with a row for every existing collection
 #' @export
 list_collections <- function(owner = "self") {
@@ -15,12 +19,14 @@ list_collections <- function(owner = "self") {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Create a time series collection.
+#' Create time series collection
 #'
-#' @family time series collection functions
-#' @param collection name of the collection to create
-#' @param description description of the collection
-#' @param owner username of the owner of the collection. By default, the username of the authenticating user is taken.
+#' By default, the collection is owned by the authenticating user.
+#' 
+#' @inheritParams param_defs
+#' @family collection functions
+#' @param description description of the time series collection
+#' @param owner username of the owner of the collection.
 #' @export
 create_collection <- function(collection, description, owner = "self") {
   
@@ -33,13 +39,13 @@ create_collection <- function(collection, description, owner = "self") {
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
-#' Delete an existing time series collection.
+#' Delete collection
 #'
 #' @inheritParams param_defs
-#' @family time series collection functions
+#' @family collection functions
 #' @export
 delete_collection <- function(collection, owner = "self") {
   
@@ -49,7 +55,7 @@ delete_collection <- function(collection, owner = "self") {
     httr2::req_method("DELETE") |> 
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
 #' Read all time series of a time series collection
@@ -78,11 +84,13 @@ read_collection_ts <- function(
   lapply(data, json_to_ts)
 }
 
-#' Read the metadata of all time series of a time series collection.
+#' Read collection time series metadata
+#' 
+#' Read the metadata of the time series in a time series collection.
 #'
 #' @inheritParams param_defs
-#' @family time series collection functions
-#' @return List of time series metadata. Each list element contains the metadata of a particular time series as a list.
+#' @family collection functions
+#' @return List of time series metadata. Each list element is named by the corresponding time series key and contains the metadata as a named list.
 #' @export
 read_collection_ts_metadata <- function(
     collection,
@@ -150,6 +158,8 @@ read_collection_keys <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
+#' Add time series to collection
+#' 
 #' Adds existing time series (given by their keys) to a time series collection.
 #'
 #' @inheritParams param_defs
@@ -170,9 +180,11 @@ add_ts_to_collection <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' Remove time series from collection
+#' 
 #' Adds time series (given by their keys) from a time series collection.
 #'
 #' @inheritParams param_defs
@@ -192,14 +204,16 @@ remove_ts_from_collection <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
-#' Read the time at which time series vintages were written
+#' Read collection time series vintage write time
 #'
+#' Read the time at which a time series vintage was written. The vintage is specified by the valid_on parameter.
+#' 
 #' @inheritParams param_defs
-#' @family time series functions
-#' @return table with update time for every time series key
+#' @family collection functions
+#' @return table with write time for every time series key in collection
 #' @export
 read_collection_ts_write_time <- function(
     collection,

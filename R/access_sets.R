@@ -1,7 +1,9 @@
 
+#' List access sets
+#' 
 #' Read information on existing time series access sets.
 #' 
-#' @family time series access set functions
+#' @family access set functions
 #' @return table with a row for every existing access set
 #' @export
 list_access_sets <- function() {
@@ -11,11 +13,13 @@ list_access_sets <- function() {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
+#' Read access set keys
+#' 
 #' Read the keys of the time series in a time series access set.
 #'
 #' @inheritParams param_defs
-#' @family time series access set functions
-#' @return character vector of time series keys
+#' @family access set functions
+#' @return vector of time series keys
 #' @export
 read_access_set_keys <- function(access_set) {
   
@@ -24,10 +28,13 @@ read_access_set_keys <- function(access_set) {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
-#' Create a time series access set
+#' Create access set
 #'
+#' Create a new time series access set.
+#' 
 #' @inheritParams param_defs
-#' @family time series access set functions
+#' @family access set functions
+#' @param description description of the access set
 #' @export
 create_access_set <- function(access_set, description) {
   
@@ -40,13 +47,15 @@ create_access_set <- function(access_set, description) {
     httr2::req_body_json(data) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' Delete access set
+#' 
 #' Delete an existing time series access set
 #'
 #' @inheritParams param_defs
-#' @family time series access set functions
+#' @family access set functions
 #' @export
 delete_access_set <- function(access_set) {
   
@@ -56,13 +65,15 @@ delete_access_set <- function(access_set) {
     httr2::req_method("DELETE") |> 
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
+#' Add time series to access set
+#' 
 #' Adds existing time series (given by their keys) to a time series access set.
 #'
 #' @inheritParams param_defs
-#' @family time series access set functions
+#' @family access set functions
 #' @export
 add_ts_to_access_set <- function(access_set, ts_keys, ignore_missing = F) {
   
@@ -78,13 +89,15 @@ add_ts_to_access_set <- function(access_set, ts_keys, ignore_missing = F) {
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 
-#' Removes time series from a time series access set.
+#' Removes time series from access set
+#' 
+#' Remove time series (given by their keys) from an access set.
 #'
 #' @inheritParams param_defs
-#' @family time series access set functions
+#' @family access set functions
 #' @export
 remove_ts_from_access_set <- function(access_set, ts_keys) {
   
@@ -99,6 +112,6 @@ remove_ts_from_access_set <- function(access_set, ts_keys) {
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  cat(httr2::resp_body_json(res)$message)
+  cat_message(res)
 }
 

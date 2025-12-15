@@ -1,7 +1,7 @@
 Package: tsdbapi
-Version: 0.4.1
-Title: Get Data from the KOF Time Series API
-Description: A package with functions to read and write time series data from a time series api. 
+Version: 0.4.2
+Title: Time Series DB API v2 Wrapper
+Description: A package that provides convenience functions for using the Time Series DB API v2. 
 Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
 Depends:
   R (>= 3.3),
