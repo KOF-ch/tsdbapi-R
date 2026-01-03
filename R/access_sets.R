@@ -4,7 +4,7 @@
 #' Read information on existing time series access sets.
 #' 
 #' @family access set functions
-#' @return table with a row for every existing access set
+#' @return Table with a row for every existing access set.
 #' @export
 list_access_sets <- function() {
   
@@ -19,7 +19,7 @@ list_access_sets <- function() {
 #'
 #' @inheritParams param_defs
 #' @family access set functions
-#' @return vector of time series keys
+#' @return Character vector of time series keys
 #' @export
 read_access_set_keys <- function(access_set) {
   
@@ -34,7 +34,7 @@ read_access_set_keys <- function(access_set) {
 #' 
 #' @inheritParams param_defs
 #' @family access set functions
-#' @param description description of the access set
+#' @param description Description of the access set
 #' @export
 create_access_set <- function(access_set, description) {
   
@@ -52,7 +52,7 @@ create_access_set <- function(access_set, description) {
 
 #' Delete access set
 #' 
-#' Delete an existing time series access set
+#' Delete an existing time series access set. Permissions granted to the access set will also be removed.
 #'
 #' @inheritParams param_defs
 #' @family access set functions
@@ -92,9 +92,9 @@ add_ts_to_access_set <- function(access_set, ts_keys, ignore_missing = F) {
   cat_message(res)
 }
 
-#' Removes time series from access set
+#' Remove time series from access set
 #' 
-#' Remove time series (given by their keys) from an access set.
+#' Remove time series (given by their keys) from a time series access set.
 #'
 #' @inheritParams param_defs
 #' @family access set functions

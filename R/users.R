@@ -7,7 +7,7 @@ user_base_url <- function(username) {
 #' 
 #' Show information on time series database users.
 #'
-#' @returns table with row for every user
+#' @returns Table with a row for every user.
 #' @family user management functions
 #' @export
 list_users <- function() {
@@ -18,9 +18,9 @@ list_users <- function() {
 
 #' Create user
 #' 
-#' Create a time series database user with the given role.
+#' Create a time series database user with a given role.
 #'
-#' @param role role of user
+#' @param role Role of the user. Must be one of 'admin', 'intern' or 'extern'.
 #' @export
 create_user <- function(username, role) {
   
@@ -40,7 +40,7 @@ create_user <- function(username, role) {
 #' List the access sets and associated permissions of a particular user.
 #'
 #' @inheritParams param_defs 
-#' @returns table with a row for every user access set
+#' @returns Table with a row for every user access set.
 #' @family user management functions
 #' @export
 list_user_access_sets <- function(username = "self") {
@@ -51,7 +51,7 @@ list_user_access_sets <- function(username = "self") {
 
 #' Add user access sets
 #' 
-#' Add access sets for a user with a given permission for the time series in the sets.
+#' Add access sets for a user with a given permission.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
@@ -75,7 +75,7 @@ add_user_access_sets <- function(
 
 #' Remove user access sets
 #' 
-#' Remove a user's access sets.
+#' Remove access sets and associated permissions from a user.
 #' 
 #' @inheritParams param_defs
 #' @family user management functions
@@ -96,9 +96,11 @@ remove_user_access_sets <- function(
   cat_message(res)
 }
 
-#' Check the number of time series downloads remaining.
+#' Read user quota
+#' 
+#' Check the number of time series downloads remaining in the current subscription year.
 #'
-#' @return table with quota information
+#' @return Table with quota information.
 #' @export
 read_user_quota <- function(username = "self") {
 
@@ -109,15 +111,15 @@ read_user_quota <- function(username = "self") {
 
 #' Create user quota
 #' 
-#' Create a quota for a data service subscriber. Without a quota, a user has an unlimited number of time series downloads.
+#' Create an annual quota for a data service subscriber. Without a quota, the user has an unlimited number of time series downloads.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
 #' @export
-create_user_quota <- function(username, package_annual_quota, subscription_start_time) {
+create_user_quota <- function(username, subscription_annual_quota, subscription_start_date) {
   
   url <- paste0(user_base_url(username), "quota")
-  data <- list(subscription_start_time=subscription_start_time, package_annual_quota=package_annual_quota)
+  data <- list(subscription_start_date=subscription_start_date, subscription_annual_quota=subscription_annual_quota)
   
   res <- req_base(url) |>
     httr2::req_method("PUT") |>
@@ -129,19 +131,19 @@ create_user_quota <- function(username, package_annual_quota, subscription_start
 
 #' Write user quota
 #' 
-#' Set the current_year_quota and/or package_annual_quota of a user's quota. 
+#' Set a user's quota for the current subscription year and/or the subscription's default annual quota.
 #'
 #' @inheritParams param_defs
 #' @family user management functions
 #' @export
-write_user_quota <- function(username, current_year_quota = NULL, package_annual_quota = NULL) {
+write_user_quota <- function(username, current_year_quota = NULL, subscription_annual_quota = NULL) {
   
   url <- paste0(user_base_url(username), "quota")
-  data <- list(current_year_quota=current_year_quota, package_annual_quota=package_annual_quota)
+  data <- list(current_year_quota=current_year_quota, subscription_annual_quota=subscription_annual_quota)
   
   res <- req_base(url) |>
     httr2::req_method("PATCH") |>
-    httr2::req_body_json(data) |>
+    httr2::req_body_json(purrr::compact(data)) |>
     httr2::req_perform()
   
   cat_message(res)

@@ -5,8 +5,8 @@ ts_base_url <- function() {
 
 #' Read time series
 #' 
-#' Read time series given by their unique identifiers (keys). The vintage to be read is specified by the valid_on parameter.
-#' By default, the most recent vintage is read (valid_on is set to the current date).
+#' Read time series given by their unique identifiers (keys). The vintage is specified by the valid_on parameter.
+#' By default, the most recent vintage is read.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
@@ -33,17 +33,19 @@ read_ts <- function(
   lapply(data, json_to_ts)
 }
 
-#' Read time series history (multiple vintages).
+#' Read time series history
 #' 
-#' Read multiple vintages of time series. The vintage range is given by the valid_from and valid_to parameter. By default, the entire history is read.
+#' Read multiple time series vintages. The vintage range is given by the valid_from and valid_to parameters. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return  List of time series. The name of each time series is the concatination of the key and the vintage date in format YYYYMMDD.
+#' @return  List of time series.
+#' Regular time series have the class ts and irregular time series the class xts.
+#' The name of each time series is the time series key concatenated with the vintage date in format YYYYMMDD.
 #' @export
 read_ts_history <- function(
     ts_keys,
-    valid_from = as.Date("1900-01-01"),
+    valid_from = NULL,
     valid_to = Sys.Date(),
     ignore_missing = F) {
   
@@ -66,7 +68,7 @@ read_ts_history <- function(
 
 #' Read time series metadata
 #' 
-#' Read time series metadata of a particular locale (de, en, fr, it, unlocalized).
+#' Read the time series metadata of a particular locale.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
@@ -74,10 +76,8 @@ read_ts_history <- function(
 #' @export
 read_ts_metadata <- function(
     ts_keys,
-    locale = c("en","de","fr","it","unlocalized"),
+    locale = NULL,
     ignore_missing = F) {
-  
-  locale <- match.arg(locale)
   
   url <- paste0(ts_base_url(), "metadata")
   
@@ -96,6 +96,9 @@ read_ts_metadata <- function(
 #' Write time series as a particular vintage (given by the valid_from parameter). 
 #'
 #' @inheritParams param_defs
+#' @param valid_from Vintage date of the time series. Defaults to the current date.
+#' @param access_sets Names of the access sets the time series are added to.
+#' If new time series are written, you must provide at least one access set name.
 #' @family time series functions
 #' @export
 write_ts <- function(
@@ -113,7 +116,7 @@ write_ts <- function(
 
   data <- list(
     valid_from=jsonlite::unbox(valid_from),
-    release_date=jsonlite::unbox(release_date),
+    release_date=jsonlite::unbox(lubridate::format_ISO8601(release_date, usetz = "Z")),
     release_topic=jsonlite::unbox(release_topic),
     release_year=jsonlite::unbox(release_year),
     release_period=jsonlite::unbox(release_period),
@@ -128,15 +131,16 @@ write_ts <- function(
   
   res <- req_base(url) |>
     httr2::req_method("PUT") |> 
-    httr2::req_body_json(data, auto_unbox = F, null = "null", na = "null") |> 
+    httr2::req_body_json(purrr::compact(data), auto_unbox = F, na = "null") |> 
     httr2::req_perform()
   
   cat_message(res)
 }
 
-#' Rename time series keys
+#' Rename time series
 #' 
-#' Change the unique identifiers (keys) of time series. The length of ts_keys and ts_keys_new must be the same.
+#' Change the time series' unique identifiers (keys).
+#' The length of the parameters ts_keys and ts_keys_new must be the same.
 #
 #' @family time series functions
 #' @inheritParams param_defs
@@ -165,11 +169,12 @@ rename_ts <- function(
 
 #' Read time series vintage write time
 #' 
-#' Read the time at which a time series vintage was written. The vintage is specified by the valid_on parameter.
+#' Read the time at which a time series vintage was written.
+#' The vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with write time for every time series key
+#' @return Table with the vintage write time for every time series key.
 #' @export
 read_ts_write_time <- function(
     ts_keys,
@@ -190,11 +195,12 @@ read_ts_write_time <- function(
 
 #' Read time series vintage release
 #'
-#' Read the release information of time series vintages. The vintage is specified by the valid_on parameter.
+#' Read the time series vintage release information.
+#' The vintage is specified by the valid_on parameter.
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @return Table with release topic, year, period and time for every time series key.
 #' @export
 read_ts_release <- function(
     ts_keys,
@@ -213,18 +219,20 @@ read_ts_release <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read time series release history
+#' Read time series vintage release history
 #'
-#' Read the releases of multiple time series vintages. The vintage range is given by the valid_from and valid_to parameter. By default, the entire release history is read.
+#' Read the release information of multiple time series vintages.
+#' The vintage range is given by the valid_from and valid_to parameters.
+#' By default, the entire release history is read.
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @return Table with release topic, year, period and time for every time series key and release.
 #' @export
 read_ts_release_history <- function(
     ts_keys,
-    valid_from = as.Date("1900-01-01"),
-    valid_to = Sys.Date(),
+    valid_from = NULL,
+    valid_to = NULL,
     ignore_missing = F) {
   
   url <- paste0(ts_base_url(), "release/history")
@@ -242,11 +250,11 @@ read_ts_release_history <- function(
 
 #' Read time series release future
 #'
-#' Read the future releases of time series.
+#' Read the release information of future time series vintages.
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and future release
+#' @return Table with release topic, year, period and time for every time series key and future release.
 #' @export
 read_ts_release_future <- function(
     ts_keys,
@@ -296,17 +304,16 @@ write_ts_release <- function(
 
 #' Write time series metadata
 #' 
-#' Write time series metadata for multiple time series. The metadata is written for a particular locale (de, en, fr, it, unlocalized) and vintage (given by the valid_from parameter).
+#' Write time series metadata of a particular locale.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
-#' @param metadata_list List of time series metadata. Each list element contains the metadata of a time series (as a list) and
-#' has the key of the time series as its name.
+#' @param metadata_list List of time series metadata named by the time series keys.
+#' Each list element contains the metadata of a time series as a named list (key-value pairs).
 #' @export
 write_ts_metadata <- function(
     metadata_list,
-    locale = c("en","de","fr","it","unlocalized"),
-    valid_from = NULL,
+    locale = NULL,
     overwrite = F) {
     
   locale <- match.arg(locale)
@@ -315,7 +322,6 @@ write_ts_metadata <- function(
   
   data <- list(
     overwrite = to_bool_query_param(overwrite),
-    valid_from = valid_from,
     locale = locale,
     metadata = unname(purrr::imap(metadata_list, ~{
       list(ts_key=jsonlite::unbox(.y), metadata=.x)
@@ -324,7 +330,7 @@ write_ts_metadata <- function(
   
   res <- req_base(url) |>
     httr2::req_method("PATCH") |> 
-    httr2::req_body_json(data) |> 
+    httr2::req_body_json(purrr::compact(data)) |> 
     httr2::req_perform()
   
   cat_message(res)
@@ -332,7 +338,7 @@ write_ts_metadata <- function(
 
 #' Write time series dataset
 #' 
-#' Assign time series to a dataset. Every time series can assigned to only one dataset. 
+#' Assign time series to a dataset. Every time series can belong to only one dataset.
 #'
 #' @inheritParams param_defs
 #' @family time series functions
@@ -355,11 +361,12 @@ write_ts_dataset <- function(
 
 #' Read time series dataset
 #'
-#' Read the dataset time series are assigned to. Every time series can be assigned to only one dataset.
+#' Read the dataset the time series belongs to.
+#' Every time series can belong to only one dataset.
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return table with dataset name for every time series key
+#' @return Table with dataset name for every time series key.
 #' @export
 read_ts_dataset <- function(
     ts_keys,
@@ -379,20 +386,30 @@ read_ts_dataset <- function(
   
 #' Delete time series
 #'
-#' Delete time series given by their unique identifiers (keys). The time series are removed completely including all vintages and metadata.
+#' Delete time series given by their unique identifiers (keys). The time series are removed completely, including all vintages and metadata.
 #' 
 #' @family time series functions
 #' @inheritParams param_defs
 #' @export
 delete_ts <- function(
     ts_keys,
-    ignore_missing = F) {
+    ignore_missing = F,
+    skip_check = F) {
+  
+  if(!skip_check){
+    message("This operation will PERMANENTLY delete the specified time series, including all vintages and metadata. If this is what you intend to do, please type yes below.")
+    ans <- readline("answer: ")
+    
+    if (ans != "yes") {
+      stop(sprintf("You typed %s, aborting.", ans))
+    }
+  }
   
   url <- ts_base_url()
   
   data <- list(
     keys=ts_keys,
-    ignore_missing=unbox(to_bool_query_param(ignore_missing)))
+    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
   
   res <- req_base(url) |>
     httr2::req_method("DELETE") |> 
@@ -403,11 +420,13 @@ delete_ts <- function(
 }
 
 
-#' Find time series keys by regular expression
+#' Find time series
+#' 
+#' Find time series keys by regular expression.
 #'
-#' @param regexp regular expression pattern to search for time series keys.
+#' @param regexp Regular expression pattern to search for time series keys.
 #' @family time series functions
-#' @return vector of time series keys matching the regular expression
+#' @return Vector of time series keys matching the regular expression.
 #' @export
 find_ts <- function(
     regexp) {

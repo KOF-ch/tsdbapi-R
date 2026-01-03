@@ -1,7 +1,7 @@
 Package: tsdbapi
-Version: 0.4.2
+Version: 0.5.0
 Title: Time Series DB API v2 Wrapper
-Description: A package that provides convenience functions for using the Time Series DB API v2. 
+Description: A package that provides convenience functions for making requests to the Time Series DB API v2. 
 Authors@R: person("Oliver", "Müller", email = "omueller@kof.ethz.ch", role = "cre")
 Depends:
   R (>= 3.3),
@@ -11,7 +11,8 @@ Imports:
   zoo,
   httr2,
   tsbox,
-  jsonlite
+  jsonlite,
+  lubridate
 Suggests:
   devtools
 URL: https://github.com/KOF-ch/tsdbapi

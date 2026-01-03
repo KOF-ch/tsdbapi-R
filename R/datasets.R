@@ -4,7 +4,7 @@
 #' Read information on existing time series datasets.
 #' 
 #' @family dataset functions
-#' @return table with a row for every existing dataset
+#' @return Table with a row for every existing dataset.
 #' @export
 list_datasets <- function() {
   
@@ -13,14 +13,65 @@ list_datasets <- function() {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read dataset time series
+#' Create a dataset
 #' 
-#' Read all time series in a dataset. The vintage to be read is specified by the valid_on parameter.
-#' By default, the most recent vintage is read (valid_on is set to the current date).
+#' Create a time series dataset. Every time series can belong to only one dataset.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return List of time series. Regular time series have the class ts and irregular time series the class xts.
+#' @param description Description of the dataset.
+#' @export
+create_dataset <- function(
+    dataset,
+    description) {
+  url <- paste0(base_url(), "datasets/", dataset)
+  
+  data <- list(description=description)
+  
+  res <- req_base(url) |>
+    httr2::req_method("PUT") |> 
+    httr2::req_body_json(data) |>
+    httr2::req_perform()
+  
+  cat_message(res)
+}
+
+#' Delete dataset
+#' 
+#' Permanently delete all time series in a dataset, including all vintages and metadata, and the dataset itself.
+#'
+#' @inheritParams param_defs
+#' @family dataset functions
+#' @export
+delete_dataset <- function(
+    dataset,
+    skip_check = F) {
+  
+  if(!skip_check) {
+    message("This operation will PERMANENTLY delete the specified time series, including all vintages and metadata. If this is what you intend to do, please type yes below.")
+    ans <- readline("answer: ")
+    
+    if (ans != "yes") {
+      stop(sprintf("You typed %s, aborting.", ans))
+    }
+  }
+  
+  url <- paste0(base_url(), "datasets/", dataset)
+
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |>
+    httr2::req_perform()
+
+  cat_message(res)
+}
+
+#' Read dataset time series
+#' 
+#' Read the time series in a dataset. The time series vintage is specified by the valid_on parameter.
+#'
+#' @inheritParams param_defs
+#' @family dataset functions
+#' @inherit read_ts return
 #' @export
 read_dataset_ts <- function(
     dataset,
@@ -42,60 +93,18 @@ read_dataset_ts <- function(
   lapply(data, json_to_ts)
 }
 
-#' Create a dataset
+#' Read dataset time series metadata
 #' 
-#' Create a time series dataset. Every time series can only be a member of a one dataset.
+#' Read the time series metadata of a particular locale of the time series in a dataset.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @param description description of the dataset
-#' @export
-create_dataset <- function(
-    dataset,
-    description) {
-  url <- paste0(base_url(), "datasets/", dataset)
-  
-  data <- list(description=description)
-  
-  res <- req_base(url) |>
-    httr2::req_method("PUT") |> 
-    httr2::req_body_json(data) |>
-    httr2::req_perform()
-  
-  cat_message(res)
-}
-
-#' Delete dataset
-#' 
-#' Delete an existing time series dataset
-#'
-#' @inheritParams param_defs
-#' @family dataset functions
-#' @export
-delete_dataset <- function(dataset) {
-  url <- paste0(base_url(), "datasets/", dataset)
-
-  res <- req_base(url) |>
-    httr2::req_method("DELETE") |>
-    httr2::req_perform()
-
-  cat_message(res)
-}
-
-#' 
-#' 
-#' Read the metadata of all time series of a time series dataset.
-#'
-#' @inheritParams param_defs
-#' @family dataset functions
-#' @return List of time series metadata. Each list element contains the metadata of a particular time series as a list.
+#' @inherit read_ts_metadata return
 #' @export
 read_dataset_ts_metadata <- function(
     dataset,
-    locale = c("de","en","fr","it","unlocalized"),
+    locale = NULL,
     ignore_missing = F) {
-  
-  locale <- match.arg(locale)
   
   url <- paste0(base_url(), "datasets/", dataset ,"/ts/metadata")
   
@@ -106,11 +115,13 @@ read_dataset_ts_metadata <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Read the history of all time series of a time series dataset (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
+#' Read dataset time series history
+#' 
+#' Read multiple vintages of the time series in a dataset The vintage range is given by the valid_from and valid_to parameter. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return  List of time series. The name of each time series includes the vintage date, i.e. the date at which the particular version of the series became valid.
+#' @inherit read_ts_history return
 #' @export
 read_dataset_ts_history <- function(
     dataset,
@@ -134,11 +145,13 @@ read_dataset_ts_history <- function(
   lapply(data, json_to_ts)
 }
 
-#' Read the keys of the time series in a time series dataset.
+#' Read dataset time series keys
+#' 
+#' Read the keys of the time series in a dataset.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return character vector of time series keys
+#' @return Character vector of time series keys.
 #' @export
 read_dataset_keys <- function(dataset) {
   
@@ -151,11 +164,13 @@ read_dataset_keys <- function(dataset) {
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
 }
 
-#' Read the time at which time series vintages were written
+#' Read dataset time series vintage write time
+#'
+#' Read the time at which a time series vintage was written. The vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return table with update time for every time series key
+#' @inherit read_ts_write_time return
 #' @export
 read_dataset_ts_write_time <- function(
     dataset,
@@ -173,11 +188,13 @@ read_dataset_ts_write_time <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read the release history of time series
+#' Read dataset time series vintage release
+#'
+#' Read the vintage release information of the time series in a dataset. The vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @inherit read_ts_release return
 #' @export
 read_dataset_ts_release <- function(
     dataset,
@@ -195,11 +212,13 @@ read_dataset_ts_release <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read the release history of time series
+#' Read dataset time series release history
+#' 
+#' Read the release information of multiple time series vintages. The vintage range is given by the valid_from and valid_to parameter. By default, the entire release history is read.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @inherit read_ts_release_history return
 #' @export
 read_dataset_ts_release_history <- function(
     dataset,
@@ -219,11 +238,13 @@ read_dataset_ts_release_history <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read the future releases of time series
+#' Read dataset time series release future
+#'
+#' Read the release information of future time series vintages.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions
-#' @return table with release topic, year, period and time for every time series key and future release
+#' @inherit read_ts_release_future return
 #' @export
 read_dataset_ts_release_future <- function(
     dataset,
@@ -239,7 +260,9 @@ read_dataset_ts_release_future <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Write the release for all time series of a dataset.
+#' Write dataset time series release
+#'
+#' Write the release information for a vintage of the time series in a dataset. The vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
 #' @family dataset functions

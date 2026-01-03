@@ -3,14 +3,14 @@ collection_base_url <- function(collection, owner) {
   paste0(base_url(), "collections/", owner, "/", collection, "/")
 }
 
-#' List collections
+#' List time series collections
 #' 
 #' Read information on existing time series collections.
-#' By default, the collections of the authenticating user are listed.
-#' To list the collections of another user, provide the username of that user as owner parameter.
+#' By default, the collections of the authenticated user are listed.
+#' To list the collections of another user, provide the username of that user as the owner parameter.
 #'
-#' @family collection functions
-#' @return table with a row for every existing collection
+#' @family time series collection functions
+#' @return Table with a row for every existing collection.
 #' @export
 list_collections <- function(owner = "self") {
   
@@ -21,14 +21,14 @@ list_collections <- function(owner = "self") {
 
 #' Create time series collection
 #'
-#' By default, the collection is owned by the authenticating user.
+#' Create a new time series collection. By default, the created collection is owned by the authenticated user.
+#' To create a collection for another user, provide the username of that user as the owner parameter.
 #' 
 #' @inheritParams param_defs
-#' @family collection functions
-#' @param description description of the time series collection
-#' @param owner username of the owner of the collection.
+#' @family time series collection functions
+#' @param description Description of the time series collection
 #' @export
-create_collection <- function(collection, description, owner = "self") {
+create_collection <- function(collection, owner = "self", description) {
   
   url <- collection_base_url(collection, owner)
   
@@ -42,10 +42,12 @@ create_collection <- function(collection, description, owner = "self") {
   cat_message(res)
 }
 
-#' Delete collection
+#' Delete time series collection
+#' 
+#' Permanently delete an existing time series collection.
 #'
 #' @inheritParams param_defs
-#' @family collection functions
+#' @family time series collection functions
 #' @export
 delete_collection <- function(collection, owner = "self") {
   
@@ -58,10 +60,13 @@ delete_collection <- function(collection, owner = "self") {
   cat_message(res)
 }
 
-#' Read all time series of a time series collection
+#' Read collection time series
+#' 
+#' Read the time series in a time series collection. The time series vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
 #' @family time series collection functions
+#' @inherit read_ts return
 #' @export
 read_collection_ts <- function(
     collection,
@@ -86,19 +91,17 @@ read_collection_ts <- function(
 
 #' Read collection time series metadata
 #' 
-#' Read the metadata of the time series in a time series collection.
+#' Read the time series metadata of a particular locale of the time series in a collection.
 #'
 #' @inheritParams param_defs
-#' @family collection functions
-#' @return List of time series metadata. Each list element is named by the corresponding time series key and contains the metadata as a named list.
+#' @family time series collection functions
+#' @inherit read_ts_metadata return
 #' @export
 read_collection_ts_metadata <- function(
     collection,
-    locale=c("de","en","fr","it","unlocalized"),
     owner = "self",
+    locale = NULL,
     ignore_missing = F) {
-  
-  locale <- match.arg(locale)
   
   url <- paste0(collection_base_url(collection, owner), "ts/metadata")
   
@@ -111,17 +114,19 @@ read_collection_ts_metadata <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Read the history of all time series of a time series collection (multiple vintages). The time span is given by the start and end parameter. By default, the entire history is read.
+#' Read collection time series history
+#' 
+#' Read multiple vintages of the time series in a collection. The vintage range is given by the valid_from and valid_to parameter. By default, the entire history is read.
 #'
 #' @inheritParams param_defs
 #' @family time series collection functions
-#' @return  List of time series. The name of each time series includes the vintage date, i.e. the date at which the particular version of the series became valid.
+#' @inherit read_ts_history return
 #' @export
 read_collection_ts_history <- function(
     collection,
-    valid_from = as.Date("1900-01-01"),
-    valid_to = Sys.Date(),
     owner = "self",
+    valid_from = NULL,
+    valid_to = NULL,
     ignore_missing = F) {
   
   url <- paste0(collection_base_url(collection, owner), "ts/history")
@@ -139,11 +144,13 @@ read_collection_ts_history <- function(
   lapply(data, json_to_ts)
 }
 
+#' Read collection time series keys
+#' 
 #' Read the keys of the time series in a time series collection.
 #'
 #' @inheritParams param_defs
 #' @family time series collection functions
-#' @return character vector of time series keys
+#' @return Character vector of time series keys.
 #' @export
 read_collection_keys <- function(
     collection,
@@ -185,7 +192,7 @@ add_ts_to_collection <- function(
 
 #' Remove time series from collection
 #' 
-#' Adds time series (given by their keys) from a time series collection.
+#' Remove existing time series (given by their keys) from a time series collection.
 #'
 #' @inheritParams param_defs
 #' @family time series collection functions
@@ -212,8 +219,8 @@ remove_ts_from_collection <- function(
 #' Read the time at which a time series vintage was written. The vintage is specified by the valid_on parameter.
 #' 
 #' @inheritParams param_defs
-#' @family collection functions
-#' @return table with write time for every time series key in collection
+#' @family time series collection functions
+#' @inherit read_ts_write_time return
 #' @export
 read_collection_ts_write_time <- function(
     collection,
@@ -232,11 +239,13 @@ read_collection_ts_write_time <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res))
 }
 
-#' Read the release history of time series
+#' Read collection time series vintage release
+#'
+#' Read the vintage release information of the time series in a collection. The vintage is specified by the valid_on parameter.
 #'
 #' @inheritParams param_defs
-#' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @family time series collection functions
+#' @inherit read_ts_release return
 #' @export
 read_collection_ts_release <- function(
     collection,
@@ -255,11 +264,13 @@ read_collection_ts_release <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read the release history of time series
+#' Read collection time series release history
+#' 
+#' Read the release information of multiple time series vintages. The vintage range is given by the valid_from and valid_to parameter. By default, the entire release history is read.
 #'
 #' @inheritParams param_defs
-#' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and release
+#' @family time series collection functions
+#' @inherit read_ts_release_history return
 #' @export
 read_collection_ts_release_history <- function(
     collection,
@@ -280,11 +291,13 @@ read_collection_ts_release_history <- function(
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }
 
-#' Read the future releases of time series
+#' Read collection time series release future
+#'
+#' Read the release information of future time series vintages.
 #'
 #' @inheritParams param_defs
-#' @family time series functions
-#' @return table with release topic, year, period and time for every time series key and future release
+#' @family time series collection functions
+#' @inherit read_ts_release_future return
 #' @export
 read_collection_ts_release_future <- function(
     collection,
