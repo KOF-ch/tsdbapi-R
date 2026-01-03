@@ -10,6 +10,7 @@ collection_base_url <- function(collection, owner) {
 #' To list the collections of another user, provide the username of that user as the owner parameter.
 #'
 #' @family time series collection functions
+#' @inheritParams param_defs 
 #' @return Table with a row for every existing collection.
 #' @export
 list_collections <- function(owner = "self") {

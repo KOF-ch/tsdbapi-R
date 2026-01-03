@@ -20,6 +20,7 @@ list_users <- function() {
 #' 
 #' Create a time series database user with a given role.
 #'
+#' @inheritParams param_defs 
 #' @param role Role of the user. Must be one of 'admin', 'intern' or 'extern'.
 #' @export
 create_user <- function(username, role) {
@@ -100,6 +101,7 @@ remove_user_access_sets <- function(
 #' 
 #' Check the number of time series downloads remaining in the current subscription year.
 #'
+#' @inheritParams param_defs 
 #' @return Table with quota information.
 #' @export
 read_user_quota <- function(username = "self") {

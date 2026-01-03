@@ -19,26 +19,33 @@
 }
 
 
-#' Set package configuration options.
+#' Set package configuration
+#' 
+#' Set the package configuration options for the current session. Every option is initialized with the corresponding environment variable on package load.
 #'
-#' @param oauth_client_id oauth client id
-#' @param oauth_client_token_url oauth client token url
-#' @param oauth_client_secret obfuscated oauth client secret. Obfuscate secret with httr2::obfuscate.
-#' @param oauth_auth_url oauth authentication URL
-#' @param oauth_redirect_url oauth redirect URL
-#' @param oauth_offline_token oauth offline token. A offline token is a refresh token that does not expire at the end of a session.
+#' @family package configuration functions
+#' @param oauth_client_id OAuth client ID.
+#' @param oauth_client_token_url OAuth token URL
+#' @param oauth_client_secret Obfuscated OAuth client secret. Obfuscate the secret with \code{\link[httr2]{obfuscate}}.
+#' @param oauth_auth_url OAuth authorization URL
+#' @param oauth_auth_device_url OAuth device authorization URL
+#' @param oauth_flow OAuth authorization flow. Must be either 'device' (default for hosted sessions) or 'code' (default otherwise).
+#' @param oauth_redirect_url OAuth redirect URL
+#' @param oauth_offline_token OAuth offline token.
+#' An offline token is a refresh token that does not expire. The package will use the provided offline token to retrieve access tokens. 
+#' This is useful in non-interactive sessions to avoid user login. Use \code{\link[tsdbapi]{get_offline_token}} to retrieve an offline token.
 #' @param url_staging URL of staging API
 #' @param url_production URL of production API
 #' @param url_test URL of test API
-#' @param environment whether to use the production, staging or test API. Must be one of 'production', 'staging' or 'test.
-#' @param access_type how to access time series data. Must be one of 'oauth' (the default), 'public' or 'preview'.
-#' With 'oauth' (open authorization), you must prove your identity by logging
-#' in to your account and you will only have the access that is granted to that account.
-#' With 'public', you only have access to public time series data. With 'preview', you only have access to a subset of the time series
-#' for which previews are allowed. The time series previews will lack the latest 2 years of data.
-#' @param read_before_release whether time series vintages should be read before their official release. Defaults to TRUE. This option will only have
+#' @param environment Whether to use the production, staging or test API. Must be one of 'production', 'staging' or 'test.
+#' @param access_type How to access time series data. Must be one of 'oauth' (the default), 'public' or 'preview'.
+#' The access types 'public' and 'preview' bypass authentication.
+#' Use the access type 'public' to read public time series and the access type 'preview' to read time series previews (latest 2 years of data missing).
+#' Use 'oauth' for authenticated access.
+#' @param read_before_release Whether to read time series vintages before their official release. Defaults to TRUE. This option will only have
 #' an effect if you have pre release access to the requested time series.
 #' @export
+#' 
 set_config <- function(
   oauth_client_id = NULL,
   oauth_client_token_url = NULL,
@@ -99,9 +106,12 @@ set_config <- function(
   }
 }
 
-#' Get current package configuration
+#' Get package configuration
+#' 
+#' Get the package configuration options of the current session. Every option is initialized with the corresponding environment variables on package load.
 #'
-#' @returns named character vector
+#' @family package configuration functions
+#' @returns Named list of options.
 #' @export
 get_config <- function() {
   opts <- c(
@@ -133,10 +143,14 @@ get_oauth_client <- function() {
   )
 } 
 
-#' Requests a refresh token that does not expire at the end of a session.
+#' Request an offline token
+#' 
+#' An offline token is a refresh token that does not expire. Use it in non-interactive sessions to avoid user login. The returned offline token must be treated like a secret.
 #'
-#' @param set_option set the tsdbapi.oauth_offline_token option. That way, the package will use the offline token to get access tokens.
-#' @returns offline token
+#' @family utility functions
+#' @param set_option If TRUE (default), the tsdbapi.oauth_offline_token option will be set.
+#' That way, the package will use the offline token to retrieve access tokens (see \code{\link[tsdbapi]{set_config}}).
+#' @returns Offline token.
 #' @export
 get_offline_token <- function(set_option = T) {
   if(getOption("tsdbapi.oauth_flow")=="device") {
@@ -167,21 +181,23 @@ req_base <- function(url) {
   
   offline_token <- getOption("tsdbapi.oauth_offline_token")
   
-  if(offline_token == "") {
-    if(getOption("tsdbapi.oauth_flow")=="device") {
-      req <- req |> httr2::req_oauth_device(
-        client = get_oauth_client(),
-        auth_url = getOption("tsdbapi.oauth_auth_device_url"))
+  if(getOption("tsdbapi.access_type") == "oauth") {
+    if(offline_token == "") {
+      if(getOption("tsdbapi.oauth_flow")=="device") {
+        req <- req |> httr2::req_oauth_device(
+          client = get_oauth_client(),
+          auth_url = getOption("tsdbapi.oauth_auth_device_url"))
+      } else {
+        req <- req |> httr2::req_oauth_auth_code(
+          client = get_oauth_client(),
+          redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
+          auth_url = getOption("tsdbapi.oauth_auth_url"))
+      }
     } else {
-      req <- req |> httr2::req_oauth_auth_code(
-        client = get_oauth_client(),
-        redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
-        auth_url = getOption("tsdbapi.oauth_auth_url"))
+      req <- req |> httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
     }
-  } else {
-    req <- req |> httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
   }
-
+  
   req |> httr2::req_url_query(
     access_type = getOption("tsdbapi.access_type"),
     read_before_release = to_bool_query_param(getOption("tsdbapi.read_before_release"))
