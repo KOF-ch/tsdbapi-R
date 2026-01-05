@@ -315,8 +315,6 @@ write_ts_metadata <- function(
     metadata_list,
     locale = NULL,
     overwrite = F) {
-    
-  locale <- match.arg(locale)
   
   url <- paste0(ts_base_url(), "metadata")
   
