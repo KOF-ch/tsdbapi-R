@@ -6,7 +6,7 @@
     tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "6rZ4TmOPbKKa1oWqbPOH4RxFbMCHCEr0g9ybz91jJ5Mt7GIktdrWx5F4KykoukxV"),
     tsdbapi.oauth_auth_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth"),
     tsdbapi.oauth_auth_device_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_DEVICE_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth/device"),
-    tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://localhost:1011"),
+    tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://127.0.0.1"),
     tsdbapi.oauth_flow = Sys.getenv("TSDBAPI_OAUTH_FLOW", unset = if(httr2:::is_hosted_session()) "device" else "code"),
     tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
     tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2/"),
