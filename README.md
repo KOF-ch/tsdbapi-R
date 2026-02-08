@@ -14,9 +14,9 @@ The package is not yet published on CRAN.
 ## Basic Usage
 
 Use the function `read_ts` to read time series from the KOF time series database. The code below reads the time series
-with the keys **ch.kof.globalbaro.leading** and **ch.kof.globalbaro.leading** and returns them as a list of objects of class **ts**.
+with the keys **ch.kof.globalbaro.coincident** and **ch.kof.globalbaro.leading** and returns them as a list of objects of class **ts**.
 ```
-tsdbapi::read_ts(ts_keys=c("ch.kof.globalbaro.leading","ch.kof.globalbaro.leading"))
+tsdbapi::read_ts(ts_keys=c("ch.kof.globalbaro.coincident","ch.kof.globalbaro.leading"))
 ```
 
 ### Authorization
@@ -46,7 +46,7 @@ tsdbapi::read_ts(ts_keys="ch.kof.barometer")
 Every time series can have multiple vintages (or versions). A time series vintage is based on the data available at its **vintage date**.
 
 By default, `read_ts` returns the most recent vintage (or version) of the time series. 
-To specify a different vintage, use the `valid_on` parameter. The code below reads the KOF barometer vintage based on the data available at January 15, 2026.
+To specify a different vintage, use the `valid_on` parameter. The code below reads the KOF barometer vintage based on the data available on January 15, 2026.
 ```
 tsdbapi::read_ts("ch.kof.barometer", valid_on = "2026-01-15")
 ```
@@ -62,7 +62,7 @@ Use the `valid_on` parameter to specify a different vintage. For users with the 
 ```
 tsdbapi::read_ts_release_future(ts_keys="ch.kof.barometer")
 ```
-Note that he release times of future vintages are not guaranteed and are subject to change (although changes are rare).
+Note that the release time of a future vintage is not guaranteed and is subject to change (although changes are rare).
 
 ### Download Quota
 
@@ -76,9 +76,9 @@ To read an entire collection of time series use
 ```
 tsdbapi::read_collection_ts(collection="bs_indicator", owner="public")
 ```
-Every time series collection has an owner. By default, the owner is assumed to be yourself `owner="self"`.
+Every time series collection has an owner. By default, the owner is assumed to be yourself (`owner="self"`).
 
-You can list all collections visible to you with
+You can list all collections you are allowed to see with
 ```
 tsdbapi::list_collections()
 ```
