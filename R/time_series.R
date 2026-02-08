@@ -200,7 +200,7 @@ read_ts_write_time <- function(
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return Table with release topic, year, period and time for every time series key.
+#' @return Table with vintage date, release topic, year, period and time for every time series key.
 #' @export
 read_ts_release <- function(
     ts_keys,
@@ -227,7 +227,7 @@ read_ts_release <- function(
 #' 
 #' @inheritParams param_defs
 #' @family time series functions
-#' @return Table with release topic, year, period and time for every time series key and release.
+#' @return Table with vintage date, release topic, year, period and time for every time series key.
 #' @export
 read_ts_release_history <- function(
     ts_keys,

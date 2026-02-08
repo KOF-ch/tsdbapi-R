@@ -2,8 +2,8 @@
 .onLoad <- function(libname, pkgname) {
   options(
     tsdbapi.oauth_client_id = Sys.getenv("TSDBAPI_OAUTH_CLIENT_ID", unset = "tsdb-api"),
-    tsdbapi.oauth_client_token_url = Sys.getenv("TSDBAPI_OAUTH_CLIENT_TOKEN_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/token"),
     tsdbapi.oauth_client_secret = Sys.getenv("TSDBAPI_OAUTH_CLIENT_SECRET", unset = "6rZ4TmOPbKKa1oWqbPOH4RxFbMCHCEr0g9ybz91jJ5Mt7GIktdrWx5F4KykoukxV"),
+    tsdbapi.oauth_token_url = Sys.getenv("TSDBAPI_OAUTH_TOKEN_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/token"),
     tsdbapi.oauth_auth_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth"),
     tsdbapi.oauth_auth_device_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_DEVICE_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth/device"),
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://127.0.0.1"),
@@ -25,7 +25,7 @@
 #'
 #' @family package configuration functions
 #' @param oauth_client_id OAuth client ID.
-#' @param oauth_client_token_url OAuth token URL
+#' @param oauth_token_url OAuth token URL
 #' @param oauth_client_secret Obfuscated OAuth client secret. Obfuscate the secret with \code{\link[httr2]{obfuscate}}.
 #' @param oauth_auth_url OAuth authorization URL
 #' @param oauth_auth_device_url OAuth device authorization URL
@@ -48,8 +48,8 @@
 #' 
 set_config <- function(
   oauth_client_id = NULL,
-  oauth_client_token_url = NULL,
   oauth_client_secret = NULL,
+  oauth_token_url = NULL,
   oauth_auth_url = NULL,
   oauth_auth_device_url = NULL,
   oauth_flow = NULL,
@@ -65,14 +65,14 @@ set_config <- function(
   if(!is.null(oauth_client_id)) {
     options(tsdbapi.oauth_client_id = oauth_client_id)
   }
-  if(!is.null(oauth_client_token_url)) {
-    options(tsdbapi.oauth_client_token_url = oauth_client_token_url)
-  }
   if(!is.null(oauth_client_secret)) {
     options(tsdbapi.oauth_client_secret = oauth_client_secret)
   }
   if(!is.null(oauth_flow)) {
     options(tsdbapi.oauth_flow = oauth_flow)
+  }
+  if(!is.null(oauth_token_url)) {
+    options(tsdbapi.oauth_token_url = oauth_token_url)
   }
   if(!is.null(oauth_auth_url)) {
     options(tsdbapi.oauth_auth_url = oauth_auth_url)
@@ -116,9 +116,9 @@ set_config <- function(
 get_config <- function() {
   opts <- c(
     "oauth_client_id",
-    "oauth_client_token_url",
     "oauth_client_secret",
     "oauth_flow",
+    "oauth_token_url",
     "oauth_auth_url",
     "oauth_auth_device_url",
     "oauth_redirect_url",
@@ -137,7 +137,7 @@ get_config <- function() {
 get_oauth_client <- function() {
   httr2::oauth_client(
     id = getOption("tsdbapi.oauth_client_id"),
-    token_url = getOption("tsdbapi.oauth_client_token_url"),
+    token_url = getOption("tsdbapi.oauth_token_url"),
     auth = "body",
     secret = httr2::obfuscated(getOption("tsdbapi.oauth_client_secret"))
   )
