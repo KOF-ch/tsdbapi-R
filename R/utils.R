@@ -149,6 +149,7 @@ get_offline_token <- function(set_option = T) {
     res <- httr2::oauth_flow_device(
       client = get_oauth_client(),
       scope = "offline_access",
+      pkce = T,
       auth_url = getOption("tsdbapi.oauth_auth_device_url")
     )
   } else {
@@ -176,9 +177,12 @@ req_base <- function(url) {
   if(getOption("tsdbapi.access_type") == "oauth") {
     if(offline_token == "") {
       if(getOption("tsdbapi.oauth_flow")=="device") {
+        code <- oauth_flow_auth_code_pkce()
         req <- req |> httr2::req_oauth_device(
           client = get_oauth_client(),
-          auth_url = getOption("tsdbapi.oauth_auth_device_url"))
+          auth_url = getOption("tsdbapi.oauth_auth_device_url"),
+          auth_params = list(code_challenge=code$challenge, code_challenge_method=code$method),
+          token_params = list(code_verifier=code$verifier))
       } else {
         req <- req |> httr2::req_oauth_auth_code(
           client = get_oauth_client(),
