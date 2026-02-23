@@ -177,7 +177,7 @@ req_base <- function(url) {
   if(getOption("tsdbapi.access_type") == "oauth") {
     if(offline_token == "") {
       if(getOption("tsdbapi.oauth_flow")=="device") {
-        code <- oauth_flow_auth_code_pkce()
+        code <- httr2::oauth_flow_auth_code_pkce()
         req <- req |> httr2::req_oauth_device(
           client = get_oauth_client(),
           auth_url = getOption("tsdbapi.oauth_auth_device_url"),
