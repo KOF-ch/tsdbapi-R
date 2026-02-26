@@ -155,7 +155,7 @@ get_offline_token <- function(set_option = T) {
   } else {
     res <- httr2::oauth_flow_auth_code(
       client = get_oauth_client(),
-      redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
+      redirect_uri = httr2:::normalize_redirect_uri(getOption("tsdbapi.oauth_redirect_url"))$uri,
       auth_url = getOption("tsdbapi.oauth_auth_url"),
       auth_params = list(scope="offline_access")
     )
@@ -186,7 +186,7 @@ req_base <- function(url) {
       } else {
         req <- req |> httr2::req_oauth_auth_code(
           client = get_oauth_client(),
-          redirect_uri = getOption("tsdbapi.oauth_redirect_url"),
+          redirect_uri = httr2:::normalize_redirect_uri(getOption("tsdbapi.oauth_redirect_url"))$uri,
           auth_url = getOption("tsdbapi.oauth_auth_url"))
       }
     } else {
