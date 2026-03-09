@@ -169,3 +169,19 @@ delete_user_quota <- function(username) {
   
   cat_message(res)
 }
+
+#' Create user API key
+#' 
+#  Create an API key for a user for programmatic access.
+#  Any previously created API key for the user will be overwritten and therefore invalidated.
+#  Store the newly created API key securely because it cannot be retrieved later.
+#' 
+#' @inheritParams param_defs
+#' @family user management functions
+#' @returns List with API key.
+#' @export
+create_user_api_key <- function(username = "self") {
+  url <- paste0(user_base_url(username), "api-key")
+  res <- req_base(url) |> httr2::req_perform()
+  jsonlite::fromJSON(httr2::resp_body_string(res))
+}

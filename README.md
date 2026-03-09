@@ -28,16 +28,16 @@ tsdbapi::read_ts(ts_keys="ch.kof.barometer")
 ```
 The time series *ch.kof.barometer* is a public time series.
 
-For **programmatic access** without user log in, for example in a non-interactive session, you must use an offline token. An offline token is a refresh token that does not expire and can be used to retrieve access tokens. Request an offline token with:
+For **programmatic access** without user log in, for example in a non-interactive session, you must use an API key. Create an API key with:
 ``` r
-mytoken <- tsdbapi::get_offline_token()
-print(mytoken)
+api_key <- tsdbapi::create_user_api_key()
+print(api_key)
 ```
-The returned offline token must be treated like a secret!
+Any previously created API key will be overwritten and therefore invalidated. Store the newly created API key securely because it cannot be retrieved later.
 
-Use the offline token by setting the environment variable `TSDBAPI_OAUTH_OFFLINE_TOKEN` before running an R script. Alternatively, you can set the corresponding package configuration option:
+Use the API key by setting the environment variable `TSDBAPI_API_KEY` before running an R script. Alternatively, you can set the corresponding package configuration option:
 ``` r
-tsdbapi::set_config(oauth_offline_token="mytoken")
+tsdbapi::set_config(api_key="my_api_key")
 tsdbapi::read_ts(ts_keys="ch.kof.barometer")
 ```
 

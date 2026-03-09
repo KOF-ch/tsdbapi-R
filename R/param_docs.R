@@ -16,7 +16,7 @@
 #' @param current_year_quota Download quota of the current year. It is automatically set to subscription_annual_quota at the start of a subscription year.
 #' @param dataset Name of the dataset. A dataset is a group of time series with a common theme. Every time series can belong to only one dataset.
 #' @param ignore_missing Whether to ignore missing or forbidden time series when requesting time series data
-#' @param access_type One of 'oauth' (the default), 'public' or 'preview'. The access types 'public' and 'preview' bypass authentication. Use the access type 'public' to read public time series and the access type 'preview' to read time series previews. Use 'oauth' for authenticated access.
+#' @param access_type One of 'auth' (the default), 'public' or 'preview'. The access types 'public' and 'preview' bypass authentication. Use the access type 'public' to read public time series and the access type 'preview' to read time series previews. Use 'auth' for authenticated access.
 #' @param locale The locale of the metadata. Can be any string, but ISO codes are recommended (such as 'en', 'de', 'fr', 'it'). Set to NULL for unlocalized metadata (default).
 #' @param owner Username of the owner of the time series collection
 #' @param collection Name of the time series collection

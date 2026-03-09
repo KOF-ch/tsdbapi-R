@@ -7,12 +7,12 @@
     tsdbapi.oauth_auth_device_url = Sys.getenv("TSDBAPI_OAUTH_AUTH_DEVICE_URL", unset = "https://keycloak.kof.ethz.ch/realms/main/protocol/openid-connect/auth/device"),
     tsdbapi.oauth_redirect_url = Sys.getenv("TSDBAPI_OAUTH_REDIRECT_URL", unset = "http://127.0.0.1/"),
     tsdbapi.oauth_flow = Sys.getenv("TSDBAPI_OAUTH_FLOW", unset = if(httr2:::is_hosted_session()) "device" else "code"),
-    tsdbapi.oauth_offline_token = Sys.getenv("TSDBAPI_OAUTH_OFFLINE_TOKEN", unset = ""),
+    tsdbapi.api_key = Sys.getenv("TSDBAPI_API_KEY", unset = ""),
     tsdbapi.url_staging = Sys.getenv("TSDBAPI_URL_STAGING", unset = "https://tsdb-api.stage.kof.ethz.ch/v2/"),
     tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2/"),
     tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/v2/"),
     tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production"),
-    tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "oauth"),
+    tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "auth"),
     tsdbapi.read_before_release = Sys.getenv("TSDBAPI_READ_BEFORE_RELEASE", unset = T)
   )
 }
@@ -29,17 +29,15 @@
 #' @param oauth_auth_device_url OAuth device authorization URL
 #' @param oauth_flow OAuth authorization flow. Must be either 'device' (default for hosted sessions) or 'code' (default otherwise).
 #' @param oauth_redirect_url OAuth redirect URL
-#' @param oauth_offline_token OAuth offline token.
-#' An offline token is a refresh token that does not expire. The package will use the provided offline token to retrieve access tokens. 
-#' This is useful in non-interactive sessions to avoid user login. Use \code{\link[tsdbapi]{get_offline_token}} to retrieve an offline token.
+#' @param api_key API key for programmatic access. Use \code{\link[tsdbapi]{create_user_api_key}} to create an API key.
 #' @param url_staging URL of staging API
 #' @param url_production URL of production API
 #' @param url_test URL of test API
 #' @param environment Whether to use the production, staging or test API. Must be one of 'production', 'staging' or 'test.
-#' @param access_type How to access time series data. Must be one of 'oauth' (the default), 'public' or 'preview'.
+#' @param access_type How to access time series data. Must be one of 'auth' (the default), 'public' or 'preview'.
 #' The access types 'public' and 'preview' bypass authentication.
 #' Use the access type 'public' to read public time series and the access type 'preview' to read time series previews (latest 2 years of data missing).
-#' Use 'oauth' for authenticated access.
+#' Use 'auth' for authenticated access.
 #' @param read_before_release Whether to read time series vintages before their official release. Defaults to TRUE. This option will only have
 #' an effect if you have pre release access to the requested time series.
 #' @export
@@ -51,7 +49,7 @@ set_config <- function(
   oauth_auth_device_url = NULL,
   oauth_flow = NULL,
   oauth_redirect_url = NULL,
-  oauth_offline_token = NULL,
+  api_key = NULL,
   url_staging = NULL,
   url_production = NULL,
   url_test = NULL,
@@ -77,8 +75,8 @@ set_config <- function(
   if(!is.null(oauth_redirect_url)) {
     options(tsdbapi.oauth_redirect_url = oauth_redirect_url)
   }
-  if(!is.null(oauth_offline_token)) {
-    options(tsdbapi.oauth_offline_token = oauth_offline_token)
+  if(!is.null(api_key)) {
+    options(tsdbapi.api_key = api_key)
   }
   if(!is.null(url_staging)) {
     options(tsdbapi.url_staging = url_staging)
@@ -115,7 +113,7 @@ get_config <- function() {
     "oauth_auth_url",
     "oauth_auth_device_url",
     "oauth_redirect_url",
-    "oauth_offline_token",
+    "api_key",
     "url_staging",
     "url_production",
     "url_test",
@@ -135,47 +133,14 @@ get_oauth_client <- function() {
   )
 } 
 
-#' Request an offline token
-#' 
-#' An offline token is a refresh token that does not expire. Use it in non-interactive sessions to avoid user login. The returned offline token must be treated like a secret.
-#'
-#' @family utility functions
-#' @param set_option If TRUE (default), the tsdbapi.oauth_offline_token option will be set.
-#' That way, the package will use the offline token to retrieve access tokens (see \code{\link[tsdbapi]{set_config}}).
-#' @returns Offline token.
-#' @export
-get_offline_token <- function(set_option = T) {
-  if(getOption("tsdbapi.oauth_flow")=="device") {
-    res <- httr2::oauth_flow_device(
-      client = get_oauth_client(),
-      scope = "offline_access",
-      pkce = T,
-      auth_url = getOption("tsdbapi.oauth_auth_device_url")
-    )
-  } else {
-    res <- httr2::oauth_flow_auth_code(
-      client = get_oauth_client(),
-      redirect_uri = httr2:::normalize_redirect_uri(getOption("tsdbapi.oauth_redirect_url"))$uri,
-      auth_url = getOption("tsdbapi.oauth_auth_url"),
-      auth_params = list(scope="offline_access")
-    )
-  }
-  
-  if(set_option) {
-    options(tsdbapi.oauth_offline_token = res$refresh_token)
-  }
-  
-  res$refresh_token
-}
-
 req_base <- function(url) {
   
   req <- httr2::request(url) |> httr2::req_error(body = function(res) httr2::resp_body_json(res)$message)
   
-  offline_token <- getOption("tsdbapi.oauth_offline_token")
+  api_key <- getOption("tsdbapi.api_key")
   
-  if(getOption("tsdbapi.access_type") == "oauth") {
-    if(offline_token == "") {
+  if(getOption("tsdbapi.access_type") == "auth") {
+    if(api_key == "") {
       if(getOption("tsdbapi.oauth_flow")=="device") {
         code <- httr2::oauth_flow_auth_code_pkce()
         req <- req |> httr2::req_oauth_device(
@@ -190,7 +155,7 @@ req_base <- function(url) {
           auth_url = getOption("tsdbapi.oauth_auth_url"))
       }
     } else {
-      req <- req |> httr2::req_oauth_refresh(get_oauth_client(), refresh_token = offline_token)
+      req <- req |> httr2::req_headers_redacted("x-api-key" = api_key)
     }
   }
   
