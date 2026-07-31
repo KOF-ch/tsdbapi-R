@@ -12,8 +12,7 @@
     tsdbapi.url_production = Sys.getenv("TSDBAPI_URL_PRODUCTION", unset = "https://tsdb-api.kof.ethz.ch/v2/"),
     tsdbapi.url_test = Sys.getenv("TSDBAPI_URL_TEST", unset = "http://localhost:3001/v2/"),
     tsdbapi.environment = Sys.getenv("TSDBAPI_ENVIRONMENT", unset = "production"),
-    tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "auth"),
-    tsdbapi.read_before_release = Sys.getenv("TSDBAPI_READ_BEFORE_RELEASE", unset = T)
+    tsdbapi.access_type = Sys.getenv("TSDBAPI_ACCESS_TYPE", unset = "auth")
   )
 }
 
@@ -38,8 +37,6 @@
 #' The access types 'public' and 'preview' bypass authentication.
 #' Use the access type 'public' to read public time series and the access type 'preview' to read time series previews (latest 2 years of data missing).
 #' Use 'auth' for authenticated access.
-#' @param read_before_release Whether to read time series vintages before their official release. Defaults to TRUE. This option will only have
-#' an effect if you have pre release access to the requested time series.
 #' @export
 #' 
 set_config <- function(
@@ -54,8 +51,7 @@ set_config <- function(
   url_production = NULL,
   url_test = NULL,
   environment = NULL,
-  access_type = NULL,
-  read_before_release = NULL
+  access_type = NULL
 ) {
   if(!is.null(oauth_client_id)) {
     options(tsdbapi.oauth_client_id = oauth_client_id)
@@ -93,9 +89,6 @@ set_config <- function(
   if(!is.null(access_type)) {
     options(tsdbapi.access_type = access_type)
   }
-  if(!is.null(read_before_release)) {
-    options(tsdbapi.read_before_release = read_before_release)
-  }
 }
 
 #' Get package configuration
@@ -118,8 +111,7 @@ get_config <- function() {
     "url_production",
     "url_test",
     "environment",
-    "access_type",
-    "read_before_release")
+    "access_type")
   
   names(opts) <- opts
   purrr::map(opts, ~getOption(paste0("tsdbapi.", .x)))
@@ -160,8 +152,7 @@ req_base <- function(url) {
   }
   
   req |> httr2::req_url_query(
-    access_type = getOption("tsdbapi.access_type"),
-    read_before_release = to_bool_query_param(getOption("tsdbapi.read_before_release"))
+    access_type = getOption("tsdbapi.access_type")
   )
 }
 
