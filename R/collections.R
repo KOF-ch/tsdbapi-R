@@ -1,6 +1,7 @@
 
 collection_base_url <- function(collection, owner) {
-  paste0(base_url(), "collections/", owner, "/", utils::URLencode(collection, reserved = TRUE), "/")
+  encoded_coll <- utils::URLencode(utils::URLencode(collection, reserved = T), reserved = T, repeated = T)
+  paste0(base_url(), "collections/", owner, "/", encoded_coll, "/")
 }
 
 #' List time series collections
