@@ -145,6 +145,43 @@ read_dataset_ts_history <- function(
   lapply(data, json_to_ts)
 }
 
+#' Delete dataset time series history
+#' 
+#' Delete multiple vintages of the time series in a dataset. The vintage range is given by the valid_from and valid_to parameters.
+#' If all vintages of a time series are deleted, the time series is removed from the catalog and its metadata deleted.
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @export
+delete_dataset_ts_history <- function(
+    dataset,
+    valid_from = NULL,
+    valid_to = Sys.Date(),
+    skip_check = F) {
+  
+  if(!skip_check) {
+    message("This operation will PERMANENTLY delete the specified time series vintages. If all vintages of a time series are deleted, the series is removed from the catalog and its metadata deleted. If this is what you intend to do, please type yes below.")
+    ans <- readline("answer: ")
+    
+    if (ans != "yes") {
+      stop(sprintf("You typed %s, aborting.", ans))
+    }
+  }
+  
+  url <- paste0(base_url(), "datasets/", dataset ,"/ts/history")
+  
+  data <- list(
+    valid_from=jsonlite::unbox(valid_from),
+    valid_to=jsonlite::unbox(valid_to))
+  
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |>
+    httr2::req_body_json(purrr::compact(data), auto_unbox = F) |>
+    httr2::req_perform()
+  
+  cat_message(res)
+}
+
 #' Read dataset time series keys
 #' 
 #' Read the keys of the time series in a dataset.

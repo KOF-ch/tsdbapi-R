@@ -68,6 +68,44 @@ read_ts_history <- function(
   lapply(data, json_to_ts)
 }
 
+#' Delete time series history
+#' 
+#' Delete multiple time series vintages. The vintage range is given by the valid_from and valid_to parameters.
+#' If all vintages of a time series are deleted, the series is removed from the catalog and its metadata deleted.
+#'
+#' @inheritParams param_defs
+#' @family time series functions
+#' @export
+delete_ts_history <- function(
+    ts_keys,
+    valid_from = NULL,
+    valid_to = Sys.Date(),
+    skip_check = F) {
+  
+  if(!skip_check) {
+    message("This operation will PERMANENTLY delete the specified time series vintages. If all vintages of a time series are deleted, the series is removed from the catalog and its metadata deleted. If this is what you intend to do, please type yes below.")
+    ans <- readline("answer: ")
+    
+    if (ans != "yes") {
+      stop(sprintf("You typed %s, aborting.", ans))
+    }
+  }
+  
+  url <- paste0(ts_base_url(), "history")
+  
+  data <- list(
+    keys=ts_keys,
+    valid_from=jsonlite::unbox(valid_from),
+    valid_to=jsonlite::unbox(valid_to))
+  
+  res <- req_base(url) |>
+    httr2::req_method("DELETE") |>
+    httr2::req_body_json(purrr::compact(data), auto_unbox = F) |>
+    httr2::req_perform()
+  
+  cat_message(res)
+}
+
 #' Read time series metadata
 #' 
 #' Read the time series metadata of a particular locale.
@@ -411,7 +449,6 @@ read_ts_dataset <- function(
 #' @export
 delete_ts <- function(
     ts_keys,
-    ignore_missing = F,
     skip_check = F) {
   
   if(!skip_check){
@@ -426,8 +463,7 @@ delete_ts <- function(
   url <- ts_base_url()
   
   data <- list(
-    keys=ts_keys,
-    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
+    keys=ts_keys)
   
   res <- req_base(url) |>
     httr2::req_method("DELETE") |> 
@@ -436,7 +472,6 @@ delete_ts <- function(
   
   cat_message(res)
 }
-
 
 #' Find time series
 #' 
