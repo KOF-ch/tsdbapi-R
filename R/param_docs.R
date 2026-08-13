@@ -4,7 +4,7 @@
 #' @param valid_on Selects the time series vintage with the vintage date equal to or before this date
 #' @param valid_from Start date of the vintage range
 #' @param valid_to End date of the vintage range
-#' @param ts_list Named list of time series of class, zoo or xts with time series keys as list names
+#' @param ts_list Named list of time series of class ts, zoo or xts with time series keys as list names
 #' @param access_sets Vector of access set names
 #' @param access  The access level of the time series. This parameter is obsolete once the Time Series DB API v1 is discontinued.
 #' @param pre_release_access The access level of the time series before the time of release. This parameter is obsolete once the Time Series DB API v1 is discontinued.

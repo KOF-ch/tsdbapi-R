@@ -169,7 +169,7 @@ write_ts <- function(
   
   data$ts_data <- unname(purrr::imap(ts_list, ~{
     freq <- if(is.ts(.x)) frequency(.x) else NULL
-    list(ts_key=jsonlite::unbox(.y), frequency=jsonlite::unbox(freq), time=zoo::as.Date(.x), value=as.vector(.x))
+    list(ts_key=jsonlite::unbox(.y), frequency=jsonlite::unbox(freq), time=zoo::as.Date(time(.x)), value=as.vector(.x))
   }))
   
   res <- req_base(url) |>
