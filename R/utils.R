@@ -127,7 +127,9 @@ get_oauth_client <- function() {
 
 req_base <- function(url) {
   
-  req <- httr2::request(url) |> httr2::req_error(body = function(res) httr2::resp_body_json(res)$message)
+  req <- httr2::request(url) |>
+    httr2::req_options(low_speed_limit = 0) |>
+    httr2::req_error(body = function(res) httr2::resp_body_json(res)$message)
   
   api_key <- getOption("tsdbapi.api_key")
   
