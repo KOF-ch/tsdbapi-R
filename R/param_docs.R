@@ -6,12 +6,12 @@
 #' @param valid_to End date of the vintage range
 #' @param ts_list Named list of time series of class ts, zoo or xts with time series keys as list names
 #' @param access_sets Vector of access set names
-#' @param access  The access level of the time series. This parameter is obsolete once the Time Series DB API v1 is discontinued.
-#' @param pre_release_access The access level of the time series before the time of release. This parameter is obsolete once the Time Series DB API v1 is discontinued.
+#' @param access  The access level of the time series. This parameter is obsolete once the koftsdb package is not in use anymore.
+#' @param pre_release_access The access level of the time series before the time of release. This parameter is obsolete.
 #' @param release_topic Topic of the release. For example 'kofbaro'.
 #' @param release_year Year of the release
 #' @param release_period Period of the release. For monthly releases a number from 1 to 12. For quarterly releases a number from 1 to 4. For half-yearly releases a number from 1 to 2. For yearly releases always 1. 
-#' @param release_date Time of the release (POSIXct). This parameter is obsolete once the Time Series DB API v1 is discontinued.
+#' @param release_date Time of the release (POSIXct). This parameter is obsolete.
 #' @param subscription_annual_quota Annual download quota of data service subscription
 #' @param current_year_quota Download quota of the current year. It is automatically set to subscription_annual_quota at the start of a subscription year.
 #' @param dataset Name of the dataset. A dataset is a group of time series with a common theme. Every time series can belong to only one dataset.
