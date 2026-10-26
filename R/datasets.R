@@ -6,7 +6,7 @@
 #' @family dataset functions
 #' @return Table with a row for every existing dataset.
 #' @export
-list_datasets <- function() {
+read_datasets <- function() {
   
   url <- paste0(base_url(), "datasets")
   res <- req_base(url) |> httr2::req_perform()
@@ -222,7 +222,9 @@ read_dataset_ts_write_time <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$write_time <- lubridate::as_datetime(df$write_time)
+  df
 }
 
 #' Read dataset time series vintage release
@@ -246,7 +248,10 @@ read_dataset_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read dataset time series release history
@@ -272,7 +277,10 @@ read_dataset_ts_release_history <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read dataset time series release future
@@ -294,7 +302,9 @@ read_dataset_ts_release_future <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df
 }
 
 #' Write dataset time series release

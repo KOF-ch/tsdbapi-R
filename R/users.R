@@ -10,7 +10,7 @@ user_base_url <- function(username) {
 #' @returns Table with a row for every user.
 #' @family user management functions
 #' @export
-list_users <- function() {
+read_users <- function() {
   url <- paste0(base_url(), "users")
   res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res))  
@@ -44,7 +44,7 @@ create_user <- function(username, role) {
 #' @returns Table with a row for every user access set.
 #' @family user management functions
 #' @export
-list_user_access_sets <- function(username = "self") {
+read_user_access_sets <- function(username = "self") {
   url <- paste0(user_base_url(username), "access-sets")
   res <- req_base(url) |> httr2::req_perform()
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()

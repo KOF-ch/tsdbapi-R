@@ -6,7 +6,7 @@
 #' @family access set functions
 #' @return Table with a row for every existing access set.
 #' @export
-list_access_sets <- function() {
+read_access_sets <- function() {
   
   url <- paste0(base_url(), "access-sets")
   res <- req_base(url) |> httr2::req_perform()

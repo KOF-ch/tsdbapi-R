@@ -153,7 +153,8 @@ write_ts <- function(
   release_period = NULL,
   access = NULL,
   pre_release_access = NULL,
-  release_date = NULL) {
+  release_date = NULL,
+  insert = F) {
   
   url <- ts_base_url()
 
@@ -165,7 +166,8 @@ write_ts <- function(
     release_period=jsonlite::unbox(release_period),
     access_sets=access_sets,
     access=jsonlite::unbox(access),
-    pre_release_access=jsonlite::unbox(pre_release_access))
+    pre_release_access=jsonlite::unbox(pre_release_access),
+    insert=jsonlite::unbox(to_bool_query_param(insert)))
   
   data$ts_data <- unname(purrr::imap(ts_list, ~{
     freq <- if(is.ts(.x)) frequency(.x) else NULL
@@ -236,7 +238,9 @@ read_ts_write_time <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$write_time <- lubridate::as_datetime(df$write_time)
+  df
 }
 
 #' Read time series vintage release
@@ -265,7 +269,10 @@ read_ts_release <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read time series vintage release history
@@ -297,7 +304,10 @@ read_ts_release_history <- function(
     httr2::req_body_json(purrr::compact(data), auto_unbox = F) |> 
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read time series release future
@@ -323,7 +333,9 @@ read_ts_release_future <- function(
     httr2::req_body_json(data, auto_unbox = F) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df
 }
 
 #' Write time series release
@@ -491,4 +503,57 @@ find_ts <- function(
     httr2::req_perform()
   
   jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.character()
+}
+
+#' Read time series access sets
+#'
+#' Read the access sets the time series belongs to.
+#' 
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return data.frame with access sets for every time series key.
+#' @export
+read_ts_access_sets <- function(
+    ts_keys,
+    ignore_missing = F) {
+  
+  url <- paste0(ts_base_url(), "access-sets")
+  
+  data <- list(
+    keys=ts_keys,
+    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
+  
+  res <- req_base(url) |>
+    httr2::req_method("POST") |>
+    httr2::req_body_json(data, auto_unbox = F) |> 
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+}
+
+
+#' Read time series collections
+#'
+#' Read the collections the time series belongs to.
+#' 
+#' @inheritParams param_defs
+#' @family time series functions
+#' @return data.frame with collections for every time series key.
+#' @export
+read_ts_collections <- function(
+    ts_keys,
+    ignore_missing = F) {
+  
+  url <- paste0(ts_base_url(), "collections")
+  
+  data <- list(
+    keys=ts_keys,
+    ignore_missing=jsonlite::unbox(to_bool_query_param(ignore_missing)))
+  
+  res <- req_base(url) |>
+    httr2::req_method("POST") |>
+    httr2::req_body_json(data, auto_unbox = F) |> 
+    httr2::req_perform()
+  
+  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
 }

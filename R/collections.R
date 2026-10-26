@@ -14,7 +14,7 @@ collection_base_url <- function(collection, owner) {
 #' @inheritParams param_defs 
 #' @return Table with a row for every existing collection.
 #' @export
-list_collections <- function(owner = "self") {
+read_collections <- function(owner = "self") {
   
   url <- paste0(base_url(), "collections/", if(is.null(owner)) "" else owner)
   res <- req_base(url) |> httr2::req_perform()
@@ -238,7 +238,9 @@ read_collection_ts_write_time <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res))
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res))
+  df$write_time <- lubridate::as_datetime(df$write_time)
+  df
 }
 
 #' Read collection time series vintage release
@@ -263,7 +265,10 @@ read_collection_ts_release <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read collection time series release history
@@ -290,7 +295,10 @@ read_collection_ts_release_history <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df$vintage_date <- lubridate::as_date(df$vintage_date)
+  df
 }
 
 #' Read collection time series release future
@@ -313,5 +321,7 @@ read_collection_ts_release_future <- function(
       ignore_missing=to_bool_query_param(ignore_missing)) |>
     httr2::req_perform()
   
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$release_time <- lubridate::as_datetime(df$release_time)
+  df
 }
