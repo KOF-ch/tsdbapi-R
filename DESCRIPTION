@@ -21,5 +21,5 @@ BugReports: https://github.com/KOF-ch/tsdbapi-R/issues
 Date: 2025-07-30
 License: GPL-2
 LazyData: true
-RoxygenNote: 7.3.3
 Encoding: UTF-8
+Config/roxygen2/version: 8.1.1
