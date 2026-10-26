@@ -142,6 +142,8 @@ read_ts_metadata <- function(
 #' @param valid_from Vintage date of the time series. Defaults to the current date.
 #' @param access_sets Names of the access sets the time series are added to.
 #' If new time series are written, you must provide at least one access set name.
+#' @param insert  Whether to write the time series with a vintage date before the
+#' newest existing vintage. This parameter is only allowed for administrators.
 #' @family time series functions
 #' @export
 write_ts <- function(
