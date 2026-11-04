@@ -18,7 +18,10 @@ read_collections <- function(owner = "self") {
   
   url <- paste0(base_url(), "collections/", if(is.null(owner)) "" else owner)
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$created_at <- lubridate::as_datetime(df$created_at)
+  df$updated_at <- lubridate::as_datetime(df$updated_at)
+  df
 }
 
 #' Create time series collection
@@ -142,7 +145,7 @@ read_collection_ts_history <- function(
     httr2::req_perform()
   
   data <- jsonlite::fromJSON(httr2::resp_body_string(res), simplifyDataFrame = F)
-  names(data) <- purrr::map_chr(data, ~paste0(.x$ts_key, "_", .x$vintage_date))
+  names(data) <- purrr::map_chr(data, ~paste0(.x$ts_key, "_", stringr::str_replace_all(.x$vintage_date, "-", "")))
   lapply(data, json_to_ts)
 }
 

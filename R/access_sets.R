@@ -10,7 +10,9 @@ read_access_sets <- function() {
   
   url <- paste0(base_url(), "access-sets")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$created_at <- lubridate::as_datetime(df$created_at)
+  df
 }
 
 #' Read access set keys

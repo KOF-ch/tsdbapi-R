@@ -80,7 +80,7 @@ Every time series collection has an owner. By default, the owner is assumed to b
 
 You can list all collections you are allowed to see with
 ``` r
-tsdbapi::list_collections()
+tsdbapi::read_collections()
 ```
 For users with the role *extern*, the includes all collections owned by the user himself and by the user *public*.
 

@@ -13,7 +13,11 @@ user_base_url <- function(username) {
 read_users <- function() {
   url <- paste0(base_url(), "users")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res))  
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$created_at <- lubridate::as_datetime(df$created_at)
+  df$current_year_start <- lubridate::as_date(df$current_year_start)
+  df$api_key_created_at <- lubridate::as_datetime(df$api_key_created_at)
+  df
 }
 
 #' Create user
@@ -47,7 +51,9 @@ create_user <- function(username, role) {
 read_user_access_sets <- function(username = "self") {
   url <- paste0(user_base_url(username), "access-sets")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$granted_at <- lubridate::as_datetime(df$granted_at)
+  df
 }
 
 #' Add user access sets
@@ -108,7 +114,10 @@ read_user_quota <- function(username = "self") {
 
   url <- paste0(user_base_url(username), "quota")
   res <- req_base(url) |> httr2::req_perform()
-  jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df <- jsonlite::fromJSON(httr2::resp_body_string(res)) |> as.data.frame()
+  df$current_year_start <- lubridate::as_date(df$current_year_start)
+  df$next_year_start <- lubridate::as_date(df$next_year_start)
+  df
 }
 
 #' Create user quota
